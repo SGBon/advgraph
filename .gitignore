@@ -1,2 +1,7 @@
 build/
 *.obj
+*.o
+*.bin
+.depend
+tergen
+
