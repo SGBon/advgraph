@@ -1,4 +1,4 @@
-CC=clang++
+CC=g++
 CFLAGS=-c -Wall -Wextra -g3
 LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
@@ -13,7 +13,7 @@ depend: $(DEPEND)
 
 $(DEPEND): $(SOURCES)
 	rm -f $@
-	$(CC) $(CFLAGS) -MM $^ > $@;
+	$(CXX) $(CFLAGS) -MM $^ > $@;
 
 include .depend
 
@@ -21,7 +21,7 @@ $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 %.o : %.cpp
-	$(CC) $(CFLAGS) $< -o $@
+	$(CXX) $(CFLAGS) $< -o $@
 
 .PHONY: clean run
 run: all
