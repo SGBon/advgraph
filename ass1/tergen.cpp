@@ -7,7 +7,7 @@
 #include <cmath>
 #include <cstdio>
 #include "Shaders.h"
-#include "terproc.h"
+#include "terproc.hpp"
 
 void displayFunc(){
 
@@ -16,10 +16,10 @@ void displayFunc(){
 
 int main(int argc, char** argv){
   glutInit(&argc, argv);
-  glutInitContextVersion(4,3);
+  glutInitContextVersion(3,3);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
   glutInitWindowPosition(100, 100);
-  glutInitWindowSize(320, 320);
+  glutInitWindowSize(640, 640);
   glutCreateWindow("Viewer");
 
   glewExperimental = GL_TRUE;
@@ -35,9 +35,13 @@ int main(int argc, char** argv){
    * calculate subdivisions
    * populate buffers */
 
+  struct terrain ter = ter_read("terrain.ter");
+
   glEnable(GL_DEPTH_TEST);
   glClearColor(1.0, 1.0, 1.0, 1.0);
 
   glutMainLoop();
+
+  ter_destroy(ter);
   return 0;
 }

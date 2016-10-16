@@ -1,0 +1,59 @@
+#include <fstream>
+#include <cstdio>
+#include <random>
+#include "terproc.hpp"
+#include "util.hpp"
+
+/* generates the terrain, performs subdivisions */
+void ter_generate(struct terrain& ter);
+
+struct terrain ter_read(std::string filename){
+  /* read the .ter file */
+  struct terrain ret;
+  std::fstream infile(filename);
+  infile >> ret.world_size[0];
+  infile >> ret.world_size[1];
+
+  infile >> ret.final_res[0];
+  infile >> ret.final_res[1];
+
+  infile >> ret.init_res[0];
+  infile >> ret.init_res[1];
+
+  const unsigned int n = ret.init_res[0];
+  const unsigned int hnum = ret.final_res[0] * ret.final_res[1];
+  const unsigned int space = (ret.final_res[0]/(n-1)) - 1; // space between initial grid points */
+  printf("%u\n",space);
+  ret.heights = new GLfloat[hnum];
+  for(unsigned int i = 0;i<hnum;i++)
+    ret.heights[i] = 0;
+
+  for(unsigned int j = 0; j<ret.final_res[1];j+=space){
+    for(unsigned int i = 0;i<ret.final_res[0];i+=space){
+      printf("%d %d\n",i,j);
+      infile >> ret.heights[one_d_index(i,j,ret.final_res[0])];
+    }
+  }
+
+  for(int i = 0;i<ret.final_res[0];i++){
+    for(int j = 0;j<ret.final_res[1];j++){
+      printf("%f ",ret.heights[one_d_index(i,j,ret.final_res[0])]);
+    }
+    printf("\n");
+  }
+
+  ter_generate(ret);
+  return ret;
+}
+
+void ter_destroy(struct terrain& ter){
+  delete ter.heights;
+}
+
+void ter_generate(struct terrain& ter){
+  std::default_random_engine generator;
+  std::normal_distribution<GLfloat> distribution(0.0,1.0);
+
+  /* width of squares */
+  unsigned int width = ter.final_res[0] - 1;
+}
