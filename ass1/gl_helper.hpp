@@ -5,7 +5,7 @@
 #include <GL/freeglut_ext.h>
 #include "TerrainVAO.hpp"
 
-void gl_init(int argc, char** argv);
+void ter_gl_init(int argc, char** argv);
 
 void add_vao(TerrainVAO vao);
 

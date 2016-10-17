@@ -10,7 +10,7 @@ void ter_generate(struct terrain& ter);
 struct terrain ter_read(std::string filename){
   /* read the .ter file */
   struct terrain ret;
-  std::fstream infile(filename);
+  std::ifstream infile(filename);
   infile >> ret.world_size;
   infile >> ret.final_res;
   infile >> ret.init_res;
@@ -23,14 +23,20 @@ struct terrain ter_read(std::string filename){
   for(unsigned int i = 0;i<hnum;i++)
     ret.heights[i] = 0;
 
-  for(unsigned int j = 0; j<ret.final_res;j+=space){
-    for(unsigned int i = 0;i<ret.final_res;i+=space){
+  for(unsigned int j = 0; j<ret.final_res;j+=ret.final_res-1){
+    for(unsigned int i = 0;i<ret.final_res;i+=ret.final_res-1){
       printf("%d %d\n",i,j);
       infile >> ret.heights[one_d_index(i,j,ret.final_res)];
     }
   }
-  printf("hello terproc ");
   infile.close();
+
+  for(unsigned int j = 0;j<ret.final_res;j++){
+    for(unsigned int i = 0;i<ret.final_res;i++){
+      printf("%.2f ",ret.heights[one_d_index(i,j,ret.final_res)]);
+    }
+    printf("\n");
+  }
 
   ter_generate(ret);
   return ret;

@@ -4,7 +4,15 @@
 
 int main(int argc, char** argv){
 
-  gl_init(argc,argv);
+
+  /* read .ter file
+   * calculate subdivisions
+   * populate buffers */
+
+  struct terrain ter = ter_read("terrain.ter");
+  printf("hello main\n");
+
+  ter_gl_init(argc,argv);
   /* compile shaders */
   GLuint program;
   int vs = buildShader(GL_VERTEX_SHADER,"ter.vs");
@@ -12,16 +20,9 @@ int main(int argc, char** argv){
   program = buildProgram(vs, fs, 0);
   dumpProgram(program, "Tergen Shader");
 
-  /* read .ter file
-   * calculate subdivisions
-   * populate buffers */
-
-  struct terrain ter = ter_read("terrain.ter");
-  printf("hello main ");
-
   TerrainVAO vao(program,ter);
   add_vao(vao);
+  printf("hello after shader\n");
 
   glutMainLoop();
-  ter_destroy(ter);
 }

@@ -33,7 +33,6 @@ void changeSize(int w, int h) {
 }
 
 void displayFunc(void) {
-  printf("hello display ");
   glm::mat4 view;
   int viewLoc;
   int projLoc;
@@ -41,11 +40,12 @@ void displayFunc(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   for(size_t i = 0;i<meshes.size();i++){
-    GLuint program = meshes[i].getShader();
+    TerrainVAO currvao = meshes[i];
+    GLuint program = currvao.getShader();
     glUseProgram(program);
 
     view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
-        glm::vec3(0.0f, 0.0f, 0.0f),
+        glm::vec3(2.0f, 2.0f, 2.0f),
         glm::vec3(0.0f, 0.0f, 1.0f));
 
     viewLoc = glGetUniformLocation(program, "modelView");
@@ -53,7 +53,8 @@ void displayFunc(void) {
     projLoc = glGetUniformLocation(program, "projection");
     glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
-    meshes[i].drawVAO();
+    //currvao.printVerts();
+    currvao.drawVAO();
   }
   glutSwapBuffers();
 }
@@ -83,10 +84,15 @@ void keyboardFunc(unsigned char key, int x, int y) {
     eyex = r*sin(theta)*cos(phi);
     eyey = r*sin(theta)*sin(phi);
     eyez = r*cos(theta);
-
+    printf("%f ",r);
     glutPostRedisplay();
 }
-void gl_init(int argc, char** argv){
+
+void idleFunc(void){
+  glutPostRedisplay();
+}
+
+void ter_gl_init(int argc, char** argv){
   glutInit(&argc, argv);
   glutInitContextVersion(3,3);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -102,20 +108,20 @@ void gl_init(int argc, char** argv){
   }
 
   glutDisplayFunc(displayFunc);
+  glutIdleFunc(idleFunc);
   glutReshapeFunc(changeSize);
   glutKeyboardFunc(keyboardFunc);
-
 
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.5, 0.5, 0.5, 1.0);
 
-  eyex = 0.0;
-  eyez = 0.0;
-  eyey = 10.0;
+  eyex = 2.0;
+  eyez = 80.0;
+  eyey = 2.0;
 
   theta = 1.5;
   phi = 1.5;
-  r = 10.0;
+  r = 80.0;
 }
 
 void add_vao(TerrainVAO vao){

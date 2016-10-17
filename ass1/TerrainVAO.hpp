@@ -23,7 +23,7 @@ private:
   void linkVertices();
 
   /* put vertices and indices into buffers */
-  void populateBuffers();
+  void populateBuffers(GLfloat* heights);
 
 public:
   /* constructor from terrain struct and shader program id */
@@ -39,7 +39,10 @@ public:
 
   GLuint getShader();
 
+  /* draws the VAO to OpenGL */
   void drawVAO();
+
+  void printVerts();
 };
 
 #endif

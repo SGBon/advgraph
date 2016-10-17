@@ -9,7 +9,7 @@ uniform mat4 projection;
 in vec4 vPosition;
 //in vec3 vNormal;
 out vec4 position;
-out vec3 normal;
+//out vec3 normal;
 
 void main() {
 	gl_Position = projection * modelView * vPosition;
