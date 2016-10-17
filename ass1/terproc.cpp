@@ -11,33 +11,28 @@ struct terrain ter_read(std::string filename){
   /* read the .ter file */
   struct terrain ret;
   std::fstream infile(filename);
-  infile >> ret.world_size[0];
-  infile >> ret.world_size[1];
+  infile >> ret.world_size;
+  infile >> ret.final_res;
+  infile >> ret.init_res;
 
-  infile >> ret.final_res[0];
-  infile >> ret.final_res[1];
-
-  infile >> ret.init_res[0];
-  infile >> ret.init_res[1];
-
-  const unsigned int n = ret.init_res[0];
-  const unsigned int hnum = ret.final_res[0] * ret.final_res[1];
-  const unsigned int space = (ret.final_res[0]/(n-1)) - 1; // space between initial grid points */
+  const unsigned int n = ret.init_res;
+  const unsigned int hnum = ret.final_res * ret.final_res;
+  const unsigned int space = (ret.final_res/(n-1)) - 1; // space between initial grid points */
   printf("%u\n",space);
   ret.heights = new GLfloat[hnum];
   for(unsigned int i = 0;i<hnum;i++)
     ret.heights[i] = 0;
 
-  for(unsigned int j = 0; j<ret.final_res[1];j+=space){
-    for(unsigned int i = 0;i<ret.final_res[0];i+=space){
+  for(unsigned int j = 0; j<ret.final_res;j+=space){
+    for(unsigned int i = 0;i<ret.final_res;i+=space){
       printf("%d %d\n",i,j);
-      infile >> ret.heights[one_d_index(i,j,ret.final_res[0])];
+      infile >> ret.heights[one_d_index(i,j,ret.final_res)];
     }
   }
 
-  for(int i = 0;i<ret.final_res[0];i++){
-    for(int j = 0;j<ret.final_res[1];j++){
-      printf("%f ",ret.heights[one_d_index(i,j,ret.final_res[0])]);
+  for(unsigned int i = 0;i<ret.final_res;i++){
+    for(unsigned int j = 0;j<ret.final_res;j++){
+      printf("%f ",ret.heights[one_d_index(i,j,ret.final_res)]);
     }
     printf("\n");
   }
@@ -55,5 +50,5 @@ void ter_generate(struct terrain& ter){
   std::normal_distribution<GLfloat> distribution(0.0,1.0);
 
   /* width of squares */
-  unsigned int width = ter.final_res[0] - 1;
+  unsigned int width = ter.final_res - 1;
 }
