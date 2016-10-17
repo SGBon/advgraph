@@ -29,13 +29,8 @@ struct terrain ter_read(std::string filename){
       infile >> ret.heights[one_d_index(i,j,ret.final_res)];
     }
   }
-
-  for(unsigned int i = 0;i<ret.final_res;i++){
-    for(unsigned int j = 0;j<ret.final_res;j++){
-      printf("%f ",ret.heights[one_d_index(i,j,ret.final_res)]);
-    }
-    printf("\n");
-  }
+  printf("hello terproc ");
+  infile.close();
 
   ter_generate(ret);
   return ret;

@@ -1,14 +1,14 @@
-#include "gl_helper.hpp"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <cstdio>
 #include <vector>
-#include "TerrainVAO.hpp"
+#include "gl_helper.hpp"
 
 static float eyex, eyey, eyez;
 
 static double theta, phi;
 static double r;
-
-static GLuint program;
 
 static glm::mat4 projection;
 
@@ -33,15 +33,15 @@ void changeSize(int w, int h) {
 }
 
 void displayFunc(void) {
-    glm::mat4 view;
-    int viewLoc;
-    int projLoc;
-    int colourLoc;
-    int eyeLoc;
-    int lightLoc;
-    int materialLoc;
+  printf("hello display ");
+  glm::mat4 view;
+  int viewLoc;
+  int projLoc;
 
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+  for(size_t i = 0;i<meshes.size();i++){
+    GLuint program = meshes[i].getShader();
     glUseProgram(program);
 
     view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
@@ -53,20 +53,9 @@ void displayFunc(void) {
     projLoc = glGetUniformLocation(program, "projection");
     glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
-    colourLoc = glGetUniformLocation(program,"colour");
-    glUniform4f(colourLoc,1.0,0.0,0.0,1.0);
-    eyeLoc = glGetUniformLocation(program,"Eye");
-    glUniform3f(eyeLoc,eyex,eyey,eyez);
-    lightLoc = glGetUniformLocation(program,"light");
-    glUniform3f(lightLoc,1.0,1.0,1.0);
-    materialLoc = glGetUniformLocation(program,"material");
-    glUniform4f(materialLoc,0.3,0.7,0.7,150.0);
-
-    for(size_t i = 0;i<meshes.size();i++){
-      meshes[i].drawVAO();
-    }
-
-    glutSwapBuffers();
+    meshes[i].drawVAO();
+  }
+  glutSwapBuffers();
 }
 
 void keyboardFunc(unsigned char key, int x, int y) {
@@ -118,7 +107,15 @@ void gl_init(int argc, char** argv){
 
 
   glEnable(GL_DEPTH_TEST);
-  glClearColor(1.0, 1.0, 1.0, 1.0);
+  glClearColor(0.5, 0.5, 0.5, 1.0);
+
+  eyex = 0.0;
+  eyez = 0.0;
+  eyey = 10.0;
+
+  theta = 1.5;
+  phi = 1.5;
+  r = 10.0;
 }
 
 void add_vao(TerrainVAO vao){
