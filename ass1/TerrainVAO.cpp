@@ -10,9 +10,6 @@ TerrainVAO::TerrainVAO(GLuint sp,struct terrain& ter)
 
 TerrainVAO::TerrainVAO(){
   glGenVertexArrays(1,&this->id);
-  glBindVertexArray(this->id);
-  glGenBuffers(1,&this->vbuffer);
-  glGenBuffers(1,&this->ibuffer);
 }
 
 void TerrainVAO::setShader(GLuint sp){
@@ -33,6 +30,7 @@ void TerrainVAO::loadTer(struct terrain& ter){
 
 void TerrainVAO::drawVAO(){
   glBindVertexArray(this->id);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,this->ibuffer);
   glDrawElements(GL_TRIANGLES,this->num_indices,GL_UNSIGNED_INT,NULL);
 }
 
@@ -63,6 +61,7 @@ void TerrainVAO::linkVertices(){
   }
   /* load indices into buffer */
   glBindVertexArray(this->id);
+  glGenBuffers(1,&this->ibuffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,this->ibuffer);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,this->num_indices*sizeof(GLuint),this->indices,GL_STATIC_DRAW);
 }
@@ -83,6 +82,7 @@ void TerrainVAO::populateBuffers(GLfloat* heights){
 
   /* load vertex data into buffer */
   glBindVertexArray(this->id);
+  glGenBuffers(1,&this->vbuffer);
   glBindBuffer(GL_ARRAY_BUFFER,this->vbuffer);
   glBufferData(GL_ARRAY_BUFFER,(vbsize)*sizeof(GLfloat),NULL,GL_STATIC_DRAW);
   glBufferSubData(GL_ARRAY_BUFFER,0,vbsize*sizeof(GLfloat),this->vertices);

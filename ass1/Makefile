@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall -Wextra -O2
+CFLAGS=-c -Wall -Wextra -g3 -std=c++11
 LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
 SOURCES=Shaders.cpp tergen.cpp terproc.cpp util.cpp gl_helper.cpp TerrainVAO.cpp
@@ -18,7 +18,7 @@ $(DEPEND): $(SOURCES)
 include .depend
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
 
 %.o : %.cpp
 	$(CXX) $(CFLAGS) $< -o $@
