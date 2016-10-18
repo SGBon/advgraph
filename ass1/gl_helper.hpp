@@ -7,6 +7,6 @@
 
 void ter_gl_init(int argc, char** argv);
 
-void add_vao(TerrainVAO vao);
+void add_vao(TerrainVAO* vao);
 
 #endif

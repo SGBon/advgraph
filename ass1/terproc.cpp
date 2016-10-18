@@ -18,25 +18,33 @@ struct terrain ter_read(std::string filename){
   const unsigned int n = ret.init_res;
   const unsigned int hnum = ret.final_res * ret.final_res;
   const unsigned int space = (ret.final_res/(n-1)) - 1; // space between initial grid points */
+
+  #ifdef DEBUG
   printf("%u\n",space);
+  #endif
+
   ret.heights = new GLfloat[hnum];
   for(unsigned int i = 0;i<hnum;i++)
     ret.heights[i] = 0;
 
   for(unsigned int j = 0; j<ret.final_res;j+=ret.final_res-1){
     for(unsigned int i = 0;i<ret.final_res;i+=ret.final_res-1){
+      #ifdef DEBUG
       printf("%d %d\n",i,j);
+      #endif
       infile >> ret.heights[one_d_index(i,j,ret.final_res)];
     }
   }
   infile.close();
 
+  #ifdef DEBUG
   for(unsigned int j = 0;j<ret.final_res;j++){
     for(unsigned int i = 0;i<ret.final_res;i++){
       printf("%.2f ",ret.heights[one_d_index(i,j,ret.final_res)]);
     }
     printf("\n");
   }
+  #endif
 
   ter_generate(ret);
   return ret;

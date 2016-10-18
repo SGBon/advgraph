@@ -1,5 +1,5 @@
-CC=g++
-CFLAGS=-c -Wall -Wextra -g3 -std=c++11
+CXX=g++
+CFLAGS=-c -Wall -Wextra -g3 -std=c++11 -Wno-write-strings -D DEBUG
 LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
 SOURCES=Shaders.cpp tergen.cpp terproc.cpp util.cpp gl_helper.cpp TerrainVAO.cpp
@@ -18,7 +18,7 @@ $(DEPEND): $(SOURCES)
 include .depend
 
 $(EXECUTABLE): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $@ $(LDFLAGS)
+	$(CXX) $(OBJECTS) -o $@ $(LDFLAGS)
 
 %.o : %.cpp
 	$(CXX) $(CFLAGS) $< -o $@

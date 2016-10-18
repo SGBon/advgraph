@@ -19,6 +19,9 @@ private:
 
   GLuint shader_program;
 
+  /* default constructor */
+  TerrainVAO();
+
   /* set indices to link up vertices into triangles*/
   void linkVertices();
 
@@ -28,8 +31,9 @@ private:
 public:
   /* constructor from terrain struct and shader program id */
   TerrainVAO(GLuint shader_program, struct terrain& ter);
-  /* default constructor */
-  TerrainVAO();
+
+  /* deconstructor */
+  ~TerrainVAO();
 
   /* load a terrain struct into the VAO */
   void loadTer(struct terrain& ter);

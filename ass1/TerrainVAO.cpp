@@ -3,13 +3,20 @@
 #include "util.hpp"
 
 TerrainVAO::TerrainVAO(GLuint sp,struct terrain& ter)
-:shader_program(sp){
-  TerrainVAO();
+:vertices(NULL),
+indices(NULL),
+shader_program(sp)
+{
+  glGenVertexArrays(1,&this->id);
   loadTer(ter);
 }
 
-TerrainVAO::TerrainVAO(){
-  glGenVertexArrays(1,&this->id);
+TerrainVAO::~TerrainVAO(){
+  printf("deconstructing %p\n",this);
+  if(vertices)
+    delete[] this->vertices;
+  if(indices)
+    delete[] this->indices;
 }
 
 void TerrainVAO::setShader(GLuint sp){
@@ -95,8 +102,10 @@ void TerrainVAO::populateBuffers(GLfloat* heights){
 }
 
 void TerrainVAO::printVerts(){
-  for(int i = 0;i<this->num_vertices*3;i+=3){
+  #ifdef DEBUG
+  for(unsigned int i = 0;i<this->num_vertices*3;i+=3){
     printf("%.2f %.2f %.2f\n",vertices[i],vertices[i+1],vertices[i+2]);
   }
   printf("------------------\n");
+  #endif
 }

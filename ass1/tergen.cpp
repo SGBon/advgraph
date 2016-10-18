@@ -20,9 +20,10 @@ int main(int argc, char** argv){
   program = buildProgram(vs, fs, 0);
   dumpProgram(program, "Tergen Shader");
 
-  TerrainVAO vao(program,ter);
+  TerrainVAO* vao = new TerrainVAO(program,ter);
   add_vao(vao);
   printf("hello after shader\n");
+  ter_destroy(ter);
 
   glutMainLoop();
 }

@@ -12,10 +12,13 @@ static double r;
 
 static glm::mat4 projection;
 
-static std::vector<TerrainVAO> meshes;
+static std::vector<TerrainVAO*> meshes;
 
 static glm::vec3 camera;
 static glm::vec3 direction;
+
+/* callback when exiting program */
+void cleanup();
 
 void changeSize(int w, int h) {
     // Prevent a divide by zero, when window is too short
@@ -40,8 +43,8 @@ void displayFunc(void) {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   for(size_t i = 0;i<meshes.size();i++){
-    TerrainVAO currvao = meshes[i];
-    GLuint program = currvao.getShader();
+    TerrainVAO* currvao = meshes[i];
+    GLuint program = currvao->getShader();
     glUseProgram(program);
 
     view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
@@ -53,8 +56,8 @@ void displayFunc(void) {
     projLoc = glGetUniformLocation(program, "projection");
     glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
-    //currvao.printVerts();
-    currvao.drawVAO();
+    currvao->printVerts();
+    currvao->drawVAO();
   }
   glutSwapBuffers();
 }
@@ -84,7 +87,9 @@ void keyboardFunc(unsigned char key, int x, int y) {
     eyex = r*sin(theta)*cos(phi);
     eyey = r*sin(theta)*sin(phi);
     eyez = r*cos(theta);
+    #ifdef DEBUG
     printf("%f ",r);
+    #endif
     glutPostRedisplay();
 }
 
@@ -116,14 +121,23 @@ void ter_gl_init(int argc, char** argv){
   glClearColor(0.5, 0.5, 0.5, 1.0);
 
   eyex = 2.0;
-  eyez = 80.0;
+  eyez = 2.0;
   eyey = 2.0;
 
   theta = 1.5;
   phi = 1.5;
-  r = 80.0;
+  r = 1.0;
+
+  atexit(cleanup);
 }
 
-void add_vao(TerrainVAO vao){
+void add_vao(TerrainVAO* vao){
   meshes.push_back(vao);
+}
+
+void cleanup(){
+  for(size_t i = 0; i < meshes.size();i++){
+    delete meshes[i];
+  }
+  exit(0);
 }
