@@ -4,3 +4,7 @@
 size_t one_d_index(size_t x, size_t y, size_t width){
   return x + y*width;
 }
+
+float normalize(float value, float min, float max){
+  return (value - min)/(max - min);
+}

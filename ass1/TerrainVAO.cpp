@@ -5,6 +5,7 @@
 TerrainVAO::TerrainVAO(GLuint sp,struct terrain& ter)
 :vertices(NULL),
 indices(NULL),
+ratio(ter.world_size / ter.final_res),
 shader_program(sp)
 {
   glGenVertexArrays(1,&this->id);
@@ -32,7 +33,8 @@ void TerrainVAO::loadTer(struct terrain& ter){
   this->width = ter.final_res;
   this->num_indices = 6*(this->width - 1)*(this->width - 1);
   linkVertices();
-  populateBuffers(ter.heights);
+  createVertices(ter.heights);
+  populateBuffers();
 }
 
 void TerrainVAO::drawVAO(){
@@ -51,19 +53,25 @@ void TerrainVAO::linkVertices(){
     for(unsigned int i = 0; i < this->width-1; i++){
       /* first triangle of quad */
       this->indices[index++] = one_d_index(i,j,this->width);
-      printf("%u ",this->indices[index-1]);
       this->indices[index++] = one_d_index(i+1,j,this->width);
-      printf("%u ",this->indices[index-1]);
       this->indices[index++] = one_d_index(i,j+1,this->width);
+
+      #ifdef DEBUG
+      printf("%u ",this->indices[index-3]);
+      printf("%u ",this->indices[index-2]);
       printf("%u\n",this->indices[index-1]);
+      #endif
 
       /* second triangle */
       this->indices[index++] = one_d_index(i+1,j,this->width);
-      printf("%u ",this->indices[index-1]);
       this->indices[index++] = one_d_index(i+1,j+1,this->width);
-      printf("%u ",this->indices[index-1]);
       this->indices[index++] = one_d_index(i,j+1,this->width);
+
+      #ifdef DEBUG
+      printf("%u ",this->indices[index-3]);
+      printf("%u ",this->indices[index-2]);
       printf("%u\n",this->indices[index-1]);
+      #endif
     }
   }
   /* load indices into buffer */
@@ -73,19 +81,23 @@ void TerrainVAO::linkVertices(){
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,this->num_indices*sizeof(GLuint),this->indices,GL_STATIC_DRAW);
 }
 
-void TerrainVAO::populateBuffers(GLfloat* heights){
+void TerrainVAO::createVertices(GLfloat* heights){
   /* vertices are stored only as height values, need to supply x,y to OpenGL */
-  const unsigned int vw = 3; /* vertex width */
-  const unsigned int vbsize = vw*this->num_vertices; /* size of vertex data in vbuffer */
+  const unsigned int vbsize = vertex_width*this->num_vertices; /* size of vertex data in vbuffer */
   this->vertices = new GLfloat[vbsize];
   for(unsigned int j = 0;j<this->width;j++){
     for(unsigned int i = 0;i<this->width;i++){
-      const unsigned int offset = vw*i + vw*j*this->width;
-      this->vertices[offset] = i;
-      this->vertices[offset + 1] = j;
+      const unsigned int offset = vertex_width*i + vertex_width*j*this->width;
+      this->vertices[offset] = i * ratio;
+      this->vertices[offset + 1] = j * ratio;
       this->vertices[offset + 2] = heights[one_d_index(i,j,this->width)];
     }
   }
+}
+
+void TerrainVAO::populateBuffers(){
+  /* vertices are stored only as height values, need to supply x,y to OpenGL */
+  const unsigned int vbsize = vertex_width*this->num_vertices; /* size of vertex data in vbuffer */
 
   /* load vertex data into buffer */
   glBindVertexArray(this->id);

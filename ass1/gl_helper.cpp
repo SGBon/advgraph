@@ -120,13 +120,13 @@ void ter_gl_init(int argc, char** argv){
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.5, 0.5, 0.5, 1.0);
 
-  eyex = 2.0;
-  eyez = 2.0;
-  eyey = 2.0;
+  eyex = 80.0;
+  eyez = 80.0;
+  eyey = 80.0;
 
   theta = 1.5;
   phi = 1.5;
-  r = 1.0;
+  r = 40.0;
 
   atexit(cleanup);
 }

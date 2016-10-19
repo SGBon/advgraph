@@ -10,23 +10,33 @@ private:
   GLuint vbuffer;
   GLuint ibuffer;
 
+  /* pointers to vertices, indices */
   GLfloat* vertices;
   GLuint* indices;
 
+  /* total number of vertices,indices */
   GLuint num_vertices;
   GLuint num_indices;
-  unsigned int width;
 
-  GLuint shader_program;
+  static const unsigned int vertex_width = 4; /* size of single vertex in OpenGL */
 
-  /* default constructor */
+  unsigned int width; /* size of grid sides */
+  const float ratio; /* ratio between grid space and world space */
+
+  GLuint shader_program; /* shader program id to use for this VAO */
+
+
+  /* default constructor, private so can't be used */
   TerrainVAO();
 
   /* set indices to link up vertices into triangles*/
   void linkVertices();
 
+  /* create vertices from height values */
+  void createVertices(GLfloat* heights);
+
   /* put vertices and indices into buffers */
-  void populateBuffers(GLfloat* heights);
+  void populateBuffers();
 
 public:
   /* constructor from terrain struct and shader program id */
@@ -41,6 +51,7 @@ public:
   /* set shader program for this VAO */
   void setShader(GLuint shader_program);
 
+  /* retrieves the shader */
   GLuint getShader();
 
   /* draws the VAO to OpenGL */

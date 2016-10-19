@@ -3,8 +3,6 @@
 #include "terproc.hpp"
 
 int main(int argc, char** argv){
-
-
   /* read .ter file
    * calculate subdivisions
    * populate buffers */
