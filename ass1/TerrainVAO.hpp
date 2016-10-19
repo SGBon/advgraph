@@ -12,13 +12,15 @@ private:
 
   /* pointers to vertices, indices */
   GLfloat* vertices;
+  GLfloat* normals;
   GLuint* indices;
 
   /* total number of vertices,indices */
   GLuint num_vertices;
   GLuint num_indices;
 
-  static const unsigned int vertex_width = 4; /* size of single vertex in OpenGL */
+  static const unsigned char vertex_width = 4; /* size of single vertex in OpenGL */
+  static const unsigned char normal_width = 3; /* size of single vertex normal */
 
   unsigned int width; /* size of grid sides */
   const float ratio; /* ratio between grid space and world space */
@@ -34,6 +36,9 @@ private:
 
   /* create vertices from height values */
   void createVertices(GLfloat* heights);
+
+  /* create normals from vertices */
+  void createNormals();
 
   /* put vertices and indices into buffers */
   void populateBuffers();
