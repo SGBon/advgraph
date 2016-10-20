@@ -9,14 +9,13 @@ uniform mat4 projection;
 in vec4 vPosition;
 in vec3 vNormal;
 in vec2 vTex;
-out vec4 position;
 out vec3 normal;
+out vec3 position;
 out vec2 tc;
 
 void main() {
-
-	gl_Position = projection * modelView * vPosition;
+  gl_Position = projection * modelView * vPosition;
   position = vPosition.xyz;
-	normal = vNormal;
+  normal = vNormal;
   tc = vTex;
 }

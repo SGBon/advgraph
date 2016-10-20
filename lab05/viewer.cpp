@@ -92,15 +92,15 @@ void init() {
     unsigned int nt = 2*verts;
     GLfloat *tex = new GLfloat[nt];
     for(i = 0;i<verts;i++){
-      int x = vertices[3*i];
-      int y = vertices[3*i+1];
-      int z = vertices[3*i+2];
+      double x = vertices[3*i];
+      double y = vertices[3*i+1];
+      double z = vertices[3*i+2];
 
-      theta = atan2(x,z);
-      phi = atan2(y,sqrt(x*x+z*z));
+      double th = atan2(x,z);
+      double ph = atan2(y,sqrt(x*x+z*z));
 
-      tex[2*i] = (theta+M_PI)/(2*M_PI);
-      tex[2*i+1] = phi / M_PI;
+      tex[2*i] = fabs(th)/M_PI;
+      tex[2*i+1] = ph / M_PI;
     }
 
     /*
@@ -121,15 +121,18 @@ void init() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, ni*sizeof(GLuint), indices, GL_STATIC_DRAW);
 
     /* load texture and put into buffer */
-    Texture *texture = loadTexture("checkerboard.jpg");
+    Cube *texture = loadCube("vcc");
     glGenTextures(1,&tbuffer);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,tbuffer);
-    glTexStorage2D(GL_TEXTURE_2D,1,GL_RGBA8,texture->width,texture->height);
-    glTexSubImage2D(GL_TEXTURE_2D,0,0,0,texture->width,texture->height,GL_RGB,GL_UNSIGNED_BYTE,texture->data);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-
+    for(i = 0;i<6;i++){
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGBA,texture->width,texture->height,0,GL_RGB,GL_UNSIGNED_BYTE,texture->data[i]);
+    }
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
     /*
     *  link the vertex coordinates to the vPosition
     *  variable in the vertex program.  Do the same
@@ -162,13 +165,17 @@ void changeSize(int w, int h) {
     glViewport(0, 0, w, h);
 
     projection = glm::perspective(45.0f, ratio, 1.0f, 100.0f);
-
+    glutPostRedisplay();
 }
 
 void displayFunc(void) {
     glm::mat4 view;
     int viewLoc;
     int projLoc;
+    int colourLoc;
+    int eyeLoc;
+    int lightLoc;
+    int materialLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glUseProgram(program);
@@ -181,6 +188,15 @@ void displayFunc(void) {
     glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(view));
     projLoc = glGetUniformLocation(program, "projection");
     glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
+
+    colourLoc = glGetUniformLocation(program,"colour");
+    glUniform4f(colourLoc,1.0,0.0,0.0,1.0);
+    eyeLoc = glGetUniformLocation(program,"Eye");
+    glUniform3f(eyeLoc,eyex,eyey,eyez);
+    lightLoc = glGetUniformLocation(program,"light");
+    glUniform3f(lightLoc,1.0,1.0,1.0);
+    materialLoc = glGetUniformLocation(program,"material");
+    glUniform4f(materialLoc,0.3,0.7,0.7,150.0);
 
     glBindVertexArray(objVAO);
     glDrawElements(GL_TRIANGLES, 3*triangles, GL_UNSIGNED_INT, NULL);
@@ -224,7 +240,7 @@ int main(int argc, char **argv) {
     int vs;
 
 		glutInit(&argc, argv);
-		glutInitContextVersion(4,3);
+		glutInitContextVersion(3,3);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(320, 320);
@@ -259,5 +275,4 @@ int main(int argc, char **argv) {
     r = 10.0;
 
     glutMainLoop();
-
 }
