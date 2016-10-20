@@ -5,11 +5,10 @@
 #version 330 core
 
 in vec4 position;
-//in vec3 normal;
+in vec3 normal;
 out vec4 fragcolor;
 
 void main() {
-  /*
 	vec4 base = vec4(1.0, 0.0, 0.0, 1.0);
 	vec4 white = vec4(1.0, 1.0, 1.0, 1.0);
 	float diffuse;
@@ -29,6 +28,5 @@ void main() {
 
 	fragcolor = min(0.3*base + 0.7*diffuse*base + 0.7*white*specular, vec4(1.0));
 	fragcolor.a = base.a;
-  */
-  fragcolor = vec4(1.0,0.0,0.0,1.0);
+  //fragcolor = vec4(1.0,0.0,0.0,1.0);
 }

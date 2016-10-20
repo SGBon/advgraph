@@ -4,18 +4,15 @@
 #include <cstdio>
 #include <vector>
 #include "gl_helper.hpp"
+#include "Camera.hpp"
 
-static float eyex, eyey, eyez;
-
-static double theta, phi;
-static double r;
+#define ESC_KEY 27
 
 static glm::mat4 projection;
 
 static std::vector<TerrainVAO*> meshes;
 
-static glm::vec3 camera;
-static glm::vec3 direction;
+static tdogl::Camera camera;
 
 /* callback when exiting program */
 void cleanup();
@@ -29,16 +26,22 @@ void changeSize(int w, int h) {
 
     float ratio = 1.0 * w / h;
 
+    camera.setViewportAspectRatio(ratio);
+
     glViewport(0, 0, w, h);
 
-    projection = glm::perspective(45.0f, ratio, 1.0f, 100.0f);
+    projection = camera.projection();
 
 }
 
 void displayFunc(void) {
-  glm::mat4 view;
   int viewLoc;
   int projLoc;
+
+  const glm::mat4 y2zup = glm::rotate(glm::mat4(1.0),0.0f,glm::vec3(1.0,0.0,0.0)); /* rotation matrix to make z up axis when y is */
+
+  const glm::mat4 view = camera.view() * y2zup;
+  const glm::mat4 projection = camera.projection();
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -47,14 +50,10 @@ void displayFunc(void) {
     GLuint program = currvao->getShader();
     glUseProgram(program);
 
-    view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
-        glm::vec3(2.0f, 2.0f, 2.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f));
-
     viewLoc = glGetUniformLocation(program, "modelView");
     glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(view));
     projLoc = glGetUniformLocation(program, "projection");
-    glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
+    glUniformMatrix4fv(projLoc,1,0,glm::value_ptr(projection));
 
     currvao->printVerts();
     currvao->drawVAO();
@@ -62,38 +61,40 @@ void displayFunc(void) {
   glutSwapBuffers();
 }
 
+void mouseDragFunc(int x, int y){
+  printf("%d %d\n",x,y);
+  const float sensitivity = 0.1f;
+  camera.offsetOrientation(y*sensitivity,x*sensitivity);
+}
+
 void keyboardFunc(unsigned char key, int x, int y) {
     switch (key) {
     case 'a':
-        phi -= 0.1;
-        break;
+      camera.offsetPosition(-camera.right());
+      break;
     case 'd':
-        phi += 0.1;
-        break;
+      camera.offsetPosition(camera.right());
+      break;
     case 'w':
-        theta += 0.1;
-        break;
+      camera.offsetPosition(camera.forward());
+      break;
     case 's':
-        theta -= 0.1;
-        break;
-		case 'q':
-			r -= 0.1;
+      camera.offsetPosition(-camera.forward());
+      break;
+		case 'z':
+      camera.offsetPosition(camera.up());
 			break;
-		case 'e':
-			r += 0.1;
+		case 'x':
+      camera.offsetPosition(-camera.up());
 			break;
+    case ESC_KEY:
+      exit(0);
+      break;
     }
-
-    eyex = r*sin(theta)*cos(phi);
-    eyey = r*sin(theta)*sin(phi);
-    eyez = r*cos(theta);
-    #ifdef DEBUG
-    printf("%f ",r);
-    #endif
-    glutPostRedisplay();
 }
 
 void idleFunc(void){
+  glutWarpPointer(0,0);
   glutPostRedisplay();
 }
 
@@ -116,17 +117,15 @@ void ter_gl_init(int argc, char** argv){
   glutIdleFunc(idleFunc);
   glutReshapeFunc(changeSize);
   glutKeyboardFunc(keyboardFunc);
+  glutMotionFunc(mouseDragFunc);
 
   glEnable(GL_DEPTH_TEST);
   glClearColor(0.5, 0.5, 0.5, 1.0);
 
-  eyex = 80.0;
-  eyez = 80.0;
-  eyey = 80.0;
+  camera.lookAt(glm::vec3(1.0,1.0,1.0));
+  camera.setPosition(glm::vec3(1.0,4.0,1.0));
 
-  theta = 1.5;
-  phi = 1.5;
-  r = 40.0;
+  glutSetCursor(GLUT_CURSOR_NONE);
 
   atexit(cleanup);
 }
