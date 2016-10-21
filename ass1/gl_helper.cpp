@@ -2,6 +2,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <cstdio>
+#define _USE_MATH_INCLUDES
+#include <cmath>
 #include <vector>
 #include "gl_helper.hpp"
 #include "Camera.hpp"
@@ -35,13 +37,15 @@ void changeSize(int w, int h) {
 }
 
 void displayFunc(void) {
-  int viewLoc;
-  int projLoc;
-
-  const glm::mat4 y2zup = glm::rotate(glm::mat4(1.0),0.0f,glm::vec3(1.0,0.0,0.0)); /* rotation matrix to make z up axis when y is */
+  /* rotation matrix to make z up axis */
+  const glm::mat4 y2zup = glm::rotate(glm::mat4(1.0),
+    (float)-M_PI_2,
+    glm::vec3(1.0,0.0,0.0));
 
   const glm::mat4 view = camera.view() * y2zup;
   const glm::mat4 projection = camera.projection();
+  const glm::vec3 eye = camera.position();
+  const glm::vec3 light = glm::vec3(1.0,1.0,1.0);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -50,10 +54,17 @@ void displayFunc(void) {
     GLuint program = currvao->getShader();
     glUseProgram(program);
 
-    viewLoc = glGetUniformLocation(program, "modelView");
+    int viewLoc = glGetUniformLocation(program, "modelView");
     glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(view));
-    projLoc = glGetUniformLocation(program, "projection");
+
+    int projLoc = glGetUniformLocation(program, "projection");
     glUniformMatrix4fv(projLoc,1,0,glm::value_ptr(projection));
+
+    int eyeLoc = glGetUniformLocation(program,"eye");
+    glUniform3f(eyeLoc,eye.x,eye.y,eye.z);
+
+    int lightLoc = glGetUniformLocation(program,"light");
+    glUniform3f(lightLoc,light.x,light.y,light.z);
 
     currvao->printVerts();
     currvao->drawVAO();
