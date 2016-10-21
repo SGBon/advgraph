@@ -8,7 +8,6 @@ int main(int argc, char** argv){
    * populate buffers */
 
   struct terrain ter = ter_read("terrain.ter");
-  printf("hello main\n");
 
   ter_gl_init(argc,argv);
   /* compile shaders */
@@ -20,7 +19,6 @@ int main(int argc, char** argv){
 
   TerrainVAO* vao = new TerrainVAO(program,ter);
   add_vao(vao);
-  printf("hello after shader\n");
   ter_destroy(ter);
 
   glutMainLoop();

@@ -16,6 +16,9 @@ static std::vector<TerrainVAO*> meshes;
 
 static tdogl::Camera camera;
 
+const unsigned short WINDOW_WIDTH = 640;
+const unsigned short WINDOW_CENTER = WINDOW_WIDTH/2;
+
 /* callback when exiting program */
 void cleanup();
 
@@ -66,16 +69,14 @@ void displayFunc(void) {
     int lightLoc = glGetUniformLocation(program,"light");
     glUniform3f(lightLoc,light.x,light.y,light.z);
 
-    currvao->printVerts();
     currvao->drawVAO();
   }
   glutSwapBuffers();
 }
 
 void mouseDragFunc(int x, int y){
-  printf("%d %d\n",x,y);
   const float sensitivity = 0.1f;
-  camera.offsetOrientation(y*sensitivity,x*sensitivity);
+  camera.offsetOrientation((y - WINDOW_CENTER)*sensitivity,(x - WINDOW_CENTER)*sensitivity);
 }
 
 void keyboardFunc(unsigned char key, int x, int y) {
@@ -105,7 +106,7 @@ void keyboardFunc(unsigned char key, int x, int y) {
 }
 
 void idleFunc(void){
-  glutWarpPointer(0,0);
+  glutWarpPointer(WINDOW_CENTER,WINDOW_CENTER);
   glutPostRedisplay();
 }
 
@@ -114,7 +115,7 @@ void ter_gl_init(int argc, char** argv){
   glutInitContextVersion(3,3);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
   glutInitWindowPosition(100, 100);
-  glutInitWindowSize(640, 640);
+  glutInitWindowSize(WINDOW_WIDTH, WINDOW_WIDTH);
   glutCreateWindow("Viewer");
 
   glewExperimental = GL_TRUE;
@@ -137,6 +138,8 @@ void ter_gl_init(int argc, char** argv){
   camera.setPosition(glm::vec3(1.0,4.0,1.0));
 
   glutSetCursor(GLUT_CURSOR_NONE);
+
+  //glPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 
   atexit(cleanup);
 }

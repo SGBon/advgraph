@@ -63,6 +63,7 @@ public:
   void drawVAO();
 
   void printVerts();
+  void printNormals();
 };
 
 #endif

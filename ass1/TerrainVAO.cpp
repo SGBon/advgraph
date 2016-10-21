@@ -61,22 +61,10 @@ void TerrainVAO::linkVertices(){
       this->indices[index++] = one_d_index(i+1,j,this->width);
       this->indices[index++] = one_d_index(i,j+1,this->width);
 
-      #ifdef DEBUG
-      printf("%u ",this->indices[index-3]);
-      printf("%u ",this->indices[index-2]);
-      printf("%u\n",this->indices[index-1]);
-      #endif
-
       /* second triangle */
       this->indices[index++] = one_d_index(i+1,j,this->width);
       this->indices[index++] = one_d_index(i+1,j+1,this->width);
       this->indices[index++] = one_d_index(i,j+1,this->width);
-
-      #ifdef DEBUG
-      printf("%u ",this->indices[index-3]);
-      printf("%u ",this->indices[index-2]);
-      printf("%u\n",this->indices[index-1]);
-      #endif
     }
   }
 }
@@ -88,17 +76,17 @@ void TerrainVAO::createVertices(GLfloat* heights){
   for(unsigned int j = 0;j<this->width;j++){
     for(unsigned int i = 0;i<this->width;i++){
       const unsigned int offset = vertex_width*i + vertex_width*j*this->width;
+      printf("(%d,%d) ",i,j);
       this->vertices[offset] = i * ratio;
       this->vertices[offset + 1] = j * ratio;
       this->vertices[offset + 2] = heights[one_d_index(i,j,this->width)];
       this->vertices[offset + 3] = 1.0;
     }
+    printf("\n");
   }
 }
 
 void TerrainVAO::createNormals(){
-  printf("VBSIZE %u\n",this->num_vertices*vertex_width);
-  glm::vec3* face_normals = new glm::vec3[this->num_indices/3];
   glm::vec4* ntable = new glm::vec4[this->num_vertices];
 
   /* initialize ntable */
@@ -110,11 +98,14 @@ void TerrainVAO::createNormals(){
   }
 
   /* loop over each triangle */
+  printf("FACE NORMS\n");
   for(unsigned int i = 0; i < num_indices; i+=3){
     /* get index to each vertex */
-    const unsigned vind1 = this->indices[i];
-    const unsigned vind2 = this->indices[i+1];
-    const unsigned vind3 = this->indices[i+2];
+    const unsigned int vind1 = this->indices[i]*this->vertex_width;
+    const unsigned int vind2 = this->indices[i+1]*this->vertex_width;
+    const unsigned int vind3 = this->indices[i+2]*this->vertex_width;
+
+    //printf("%d %d %d\n",vind1,vind2,vind3);
 
     const glm::vec3 vert1(this->vertices[vind1],this->vertices[vind1+1],this->vertices[vind1+2]);
     const glm::vec3 vert2(this->vertices[vind2],this->vertices[vind2+1],this->vertices[vind2+2]);
@@ -123,45 +114,42 @@ void TerrainVAO::createNormals(){
     const glm::vec3 vec1(vert2 - vert1);
     const glm::vec3 vec2(vert3 - vert2);
 
-    const glm::vec3 fnorm = glm::cross(vec1,vec2);
-
-    face_normals[i/3] = fnorm;
+    const glm::vec3 fnorm = glm::normalize(glm::cross(vec1,vec2));
 
     /* sum up face normals on vertex normals */
-    ntable[vind1].x += fnorm.x;
-    ntable[vind1].y += fnorm.y;
-    ntable[vind1].z += fnorm.z;
-    ntable[vind1].w += 1.0;
+    const unsigned int indv1 = vind1/vertex_width;
+    const unsigned int indv2 = vind2/vertex_width;
+    const unsigned int indv3 = vind3/vertex_width;
+    ntable[indv1].x += fnorm.x;
+    ntable[indv1].y += fnorm.y;
+    ntable[indv1].z += fnorm.z;
+    ntable[indv1].w += 1.0;
 
-    ntable[vind2].x += fnorm.x;
-    ntable[vind2].y += fnorm.y;
-    ntable[vind2].z += fnorm.z;
-    ntable[vind2].w += 1.0;
+    ntable[indv2].x += fnorm.x;
+    ntable[indv2].y += fnorm.y;
+    ntable[indv2].z += fnorm.z;
+    ntable[indv2].w += 1.0;
 
-    ntable[vind3].x += fnorm.x;
-    ntable[vind3].y += fnorm.y;
-    ntable[vind3].z += fnorm.z;
-    ntable[vind3].w += 1.0;
+    ntable[indv3].x += fnorm.x;
+    ntable[indv3].y += fnorm.y;
+    ntable[indv3].z += fnorm.z;
+    ntable[indv3].w += 1.0;
   }
 
   /* create our vertex normals */
   this->normals = new GLfloat[this->num_vertices*normal_width];
   for(unsigned int i = 0; i < this->num_vertices;i++){
     const float den = ntable[i].w;
-    glm::vec3 norm = glm::vec3(ntable[i].x/den,ntable[i].y/den,ntable[i].z/den);
+    const unsigned int nind = i*normal_width;
+    glm::vec3 norm = glm::normalize(glm::vec3(ntable[i].x/den,ntable[i].y/den,ntable[i].z/den));
 
-    /* only normalize if magnitude != 0 */
-    if(glm::length(norm)){
-      norm = glm::normalize(norm);
-    }
-
-    normals[i*normal_width] = norm.x;
-    normals[i*normal_width+1] = norm.y;
-    normals[i*normal_width+2] = norm.z;
+    normals[nind] = norm.x;
+    normals[nind+1] = norm.y;
+    normals[nind+2] = norm.z;
   }
 
   delete[] ntable;
-  delete[] face_normals;
+  this->printNormals();
 }
 
 void TerrainVAO::populateBuffers(){
@@ -201,5 +189,15 @@ void TerrainVAO::printVerts(){
     printf("%.2f %.2f %.2f\n",vertices[i],vertices[i+1],vertices[i+2]);
   }
   printf("------------------\n");
+  #endif
+}
+
+void TerrainVAO::printNormals(){
+  #ifdef DEBUG
+  printf("NORMALS:\n");
+  for(unsigned int i = 0;i<this->num_vertices*3;i+=3){
+    printf("%.2f %.2f %.2f\n",normals[i],normals[i+1],normals[i+2]);
+  }
+  printf("-------------------\n");
   #endif
 }

@@ -25,7 +25,7 @@ struct terrain ter_read(std::string filename){
 
   ret.heights = new GLfloat[hnum];
   for(unsigned int i = 0;i<hnum;i++)
-    ret.heights[i] = 1;
+    ret.heights[i] = 0;
 
   for(unsigned int j = 0; j<ret.final_res;j+=ret.final_res-1){
     for(unsigned int i = 0;i<ret.final_res;i+=ret.final_res-1){
