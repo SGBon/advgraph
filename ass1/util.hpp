@@ -9,6 +9,8 @@ size_t one_d_index(size_t x, size_t y,size_t width);
 /* normalize input value between min and max and return result */
 float normalize(float value,float min, float max);
 
-void printVec3(glm::vec3 vec);
+void printVec3(glm::vec3& vec);
+
+void printVec4(glm::vec4& vec);
 
 #endif

@@ -1,15 +1,15 @@
 #include "gl_helper.hpp"
 #include "Shaders.h"
 #include "terproc.hpp"
+#include "Texture1D.hpp"
 
 int main(int argc, char** argv){
-  /* read .ter file
-   * calculate subdivisions
-   * populate buffers */
+  /* initialize opengl */
+  ter_gl_init(argc,argv);
 
+  /* read ter file */
   struct terrain ter = ter_read("terrain.ter");
 
-  ter_gl_init(argc,argv);
   /* compile shaders */
   GLuint program;
   int vs = buildShader(GL_VERTEX_SHADER,"ter.vs");
@@ -17,7 +17,16 @@ int main(int argc, char** argv){
   program = buildProgram(vs, fs, 0);
   dumpProgram(program, "Tergen Shader");
 
-  TerrainVAO* vao = new TerrainVAO(program,ter);
+  /* define colour ranges for terrain */
+  std::vector<glm::vec4> colours;
+  colours.push_back(glm::vec4(1.0,0.0,0.0,1.0));
+  colours.push_back(glm::vec4(0.0,1.0,0.0,1.0));
+  colours.push_back(glm::vec4(0.0,0.0,1.0,1.0));
+  int ranges[] = {10,20,30};
+  GLuint texture = genTexture1D(colours,ranges);
+
+  /* create VAO and hand over to GL helper functions */
+  TerrainVAO* vao = new TerrainVAO(program,texture,ter);
   add_vao(vao);
   ter_destroy(ter);
 

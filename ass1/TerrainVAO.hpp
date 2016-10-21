@@ -1,14 +1,18 @@
 #ifndef TERGEN_TERRAIN_VAO_H
 #define TERGEN_TERRAIN_VAO_H
+/* VAO for terrain class */
+
 #include <GL/glew.h>
 #include <GL/glut.h>
 #include <GL/freeglut_ext.h>
 #include "tertype.h"
+
 class TerrainVAO{
 private:
   GLuint id;
   GLuint vbuffer;
   GLuint ibuffer;
+  GLuint texture;
 
   /* pointers to vertices, indices */
   GLfloat* vertices;
@@ -44,8 +48,8 @@ private:
   void populateBuffers();
 
 public:
-  /* constructor from terrain struct and shader program id */
-  TerrainVAO(GLuint shader_program, struct terrain& ter);
+  /* constructor from terrain struct, shader program id, and texture */
+  TerrainVAO(GLuint shader_program, GLuint texture_id, struct terrain& ter);
 
   /* deconstructor */
   ~TerrainVAO();

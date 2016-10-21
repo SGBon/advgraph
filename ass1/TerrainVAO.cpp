@@ -3,8 +3,9 @@
 #include "util.hpp"
 #include <glm/glm.hpp>
 
-TerrainVAO::TerrainVAO(GLuint sp,struct terrain& ter)
-:vertices(NULL),
+TerrainVAO::TerrainVAO(GLuint sp, GLuint tid,struct terrain& ter)
+:texture(tid),
+vertices(NULL),
 normals(NULL),
 indices(NULL),
 ratio(ter.world_size / ter.final_res),
@@ -12,6 +13,8 @@ shader_program(sp)
 {
   glGenVertexArrays(1,&this->id);
   loadTer(ter);
+  createNormals();
+  populateBuffers();
 }
 
 TerrainVAO::~TerrainVAO(){
@@ -38,8 +41,6 @@ void TerrainVAO::loadTer(struct terrain& ter){
   this->num_indices = 6*(this->width - 1)*(this->width - 1);
   linkVertices();
   createVertices(ter.heights);
-  createNormals();
-  populateBuffers();
 }
 
 void TerrainVAO::drawVAO(){

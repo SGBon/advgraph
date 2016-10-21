@@ -1,14 +1,12 @@
+#define _USE_MATH_INCLUDES
+#include <cstdio>
+#include <cmath>
+#include <vector>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <cstdio>
-#define _USE_MATH_INCLUDES
-#include <cmath>
-#include <vector>
 #include "gl_helper.hpp"
 #include "Camera.hpp"
-
-#define ESC_KEY 27
 
 static glm::mat4 projection;
 
@@ -80,6 +78,7 @@ void mouseDragFunc(int x, int y){
 }
 
 void keyboardFunc(unsigned char key, int x, int y) {
+  #define ESC_KEY 27
     switch (key) {
     case 'a':
       camera.offsetPosition(-camera.right());
@@ -125,6 +124,7 @@ void ter_gl_init(int argc, char** argv){
       exit(0);
   }
 
+  /* set glut callbacks */
   glutDisplayFunc(displayFunc);
   glutIdleFunc(idleFunc);
   glutReshapeFunc(changeSize);

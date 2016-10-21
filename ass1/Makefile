@@ -2,7 +2,8 @@ CXX=g++
 CFLAGS=-c -Wall -Wextra -g3 -std=c++11 -Wno-write-strings -D DEBUG
 LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
-SOURCES=Shaders.cpp tergen.cpp terproc.cpp util.cpp gl_helper.cpp TerrainVAO.cpp Camera.cpp
+SOURCES=Shaders.cpp tergen.cpp terproc.cpp util.cpp gl_helper.cpp\
+TerrainVAO.cpp Camera.cpp Texture1D.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPEND=.depend
 EXECUTABLE=tergen
