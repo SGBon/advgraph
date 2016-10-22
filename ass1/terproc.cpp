@@ -42,7 +42,7 @@ void ter_generate(struct terrain& ter){
   /* haha STL is so ugly */
   std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
   std::normal_distribution<GLfloat> distribution(0.0,1.0);
-  float h = 0.2f;
+  float h = 1.0f;
 
   for(unsigned int width = ter.final_res - 1;width > 1;width /=2,h/=2.0){
     const unsigned int half_width = width/2;
@@ -63,16 +63,19 @@ void ter_generate(struct terrain& ter){
 
     /* diamond step, get average of points in diamond around midpoint */
     /* during iterations, x,y are center point of diamond */
-    for(unsigned int x = 0;x < width; x+=half_width){
-      for(unsigned int y = (x+half_width)%width;y<width;y+=width){
-        float avg = ter.heights[one_d_index((x-half_width)%width,y,ter.final_res)] +
-        ter.heights[one_d_index((x+half_width)%width,y,ter.final_res)] +
-        ter.heights[one_d_index(x,(y+half_width)%width,ter.final_res)] +
-        ter.heights[one_d_index(x,(y-half_width+width)%width,ter.final_res)];
+    for(unsigned int x = 0;x < ter.final_res - 1; x+=half_width){
+      for(unsigned int y = (x+half_width)%width;y<ter.final_res - 1;y+=width){
+        float avg = ter.heights[one_d_index((x-half_width + ter.final_res-1)%(ter.final_res-1),y,ter.final_res)] +
+        ter.heights[one_d_index((x+half_width)%(ter.final_res-1),y,ter.final_res)] +
+        ter.heights[one_d_index(x,(y+half_width)%(ter.final_res-1),ter.final_res)] +
+        ter.heights[one_d_index(x,(y-half_width+ter.final_res-1)%(ter.final_res-1),ter.final_res)];
         avg /= 4.0f;
 
         avg = avg + (distribution(generator)*2*h) - h;
         ter.heights[one_d_index(x,y,ter.final_res)] = avg;
+
+        if(x == 0) ter.heights[one_d_index(ter.final_res-1,y,ter.final_res)] = avg;
+        if(y == 0) ter.heights[one_d_index(x,ter.final_res-1,ter.final_res)] = avg;
       }
     }
   }
