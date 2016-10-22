@@ -39,10 +39,10 @@ void ter_destroy(struct terrain& ter){
 }
 
 void ter_generate(struct terrain& ter){
-  /* haha STL is so ugly */
+  /* Random number generator, obviously from STL as you can see from the syntax */
   std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
   std::normal_distribution<GLfloat> distribution(0.0,1.0);
-  float h = 1.0f;
+  float h = 0.2f; /* this is a nice starting value */
 
   for(unsigned int width = ter.final_res - 1;width > 1;width /=2,h/=2.0){
     const unsigned int half_width = width/2;

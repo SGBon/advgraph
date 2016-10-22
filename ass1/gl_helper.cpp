@@ -14,6 +14,9 @@ static std::vector<TerrainVAO*> meshes;
 
 static tdogl::Camera camera;
 
+/* default value */
+static float movespeed = 1.0f;
+
 const unsigned short WINDOW_WIDTH = 640;
 const unsigned short WINDOW_CENTER = WINDOW_WIDTH/2;
 
@@ -79,25 +82,24 @@ void mouseDragFunc(int x, int y){
 
 void keyboardFunc(unsigned char key, int x, int y) {
   #define ESC_KEY 27
-  const float ms = 5.0f; /* movespeed */
     switch (key) {
     case 'a':
-      camera.offsetPosition(-camera.right()*ms);
+      camera.offsetPosition(-camera.right()*movespeed);
       break;
     case 'd':
-      camera.offsetPosition(camera.right()*ms);
+      camera.offsetPosition(camera.right()*movespeed);
       break;
     case 'w':
-      camera.offsetPosition(camera.forward()*ms);
+      camera.offsetPosition(camera.forward()*movespeed);
       break;
     case 's':
-      camera.offsetPosition(-camera.forward()*ms);
+      camera.offsetPosition(-camera.forward()*movespeed);
       break;
 		case 'z':
-      camera.offsetPosition(camera.up()*ms);
+      camera.offsetPosition(camera.up()*movespeed);
 			break;
 		case 'x':
-      camera.offsetPosition(-camera.up()*ms);
+      camera.offsetPosition(-camera.up()*movespeed);
 			break;
     case ESC_KEY:
       exit(0);
@@ -145,6 +147,14 @@ void ter_gl_init(int argc, char** argv){
 
   atexit(cleanup);
 }
+
+
+/* sets movespeed for camera
+ * to move several grid units per movement
+ */
+void setMS(const float world_size,const float grid_res){
+  movespeed = (world_size/grid_res) * 5.0f;
+};
 
 void add_vao(TerrainVAO* vao){
   meshes.push_back(vao);

@@ -28,6 +28,7 @@ int main(int argc, char** argv){
   /* create VAO and hand over to GL helper functions */
   TerrainVAO* vao = new TerrainVAO(program,texture,ter);
   add_vao(vao);
+  setMS(ter.world_size,ter.final_res);
   ter_destroy(ter);
 
   glutMainLoop();
