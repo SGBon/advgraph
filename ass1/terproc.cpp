@@ -1,5 +1,6 @@
-#include <fstream>
 #include <cstdio>
+#include <fstream>
+#include <chrono>
 #include <random>
 #include "terproc.hpp"
 #include "util.hpp"
@@ -15,13 +16,8 @@ struct terrain ter_read(std::string filename){
   infile >> ret.final_res;
   infile >> ret.init_res;
 
-  const unsigned int n = ret.init_res;
+  //const unsigned int n = ret.init_res;
   const unsigned int hnum = ret.final_res * ret.final_res;
-  const unsigned int space = (ret.final_res/(n-1)) - 1; // space between initial grid points */
-
-  #ifdef DEBUG
-  printf("%u\n",space);
-  #endif
 
   ret.heights = new GLfloat[hnum];
   for(unsigned int i = 0;i<hnum;i++)
@@ -29,22 +25,10 @@ struct terrain ter_read(std::string filename){
 
   for(unsigned int j = 0; j<ret.final_res;j+=ret.final_res-1){
     for(unsigned int i = 0;i<ret.final_res;i+=ret.final_res-1){
-      #ifdef DEBUG
-      printf("%d %d\n",i,j);
-      #endif
       infile >> ret.heights[one_d_index(i,j,ret.final_res)];
     }
   }
   infile.close();
-
-  #ifdef DEBUG
-  for(unsigned int j = 0;j<ret.final_res;j++){
-    for(unsigned int i = 0;i<ret.final_res;i++){
-      printf("%.2f ",ret.heights[one_d_index(i,j,ret.final_res)]);
-    }
-    printf("\n");
-  }
-  #endif
 
   ter_generate(ret);
   return ret;
@@ -55,9 +39,41 @@ void ter_destroy(struct terrain& ter){
 }
 
 void ter_generate(struct terrain& ter){
-  std::default_random_engine generator;
+  /* haha STL is so ugly */
+  std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
   std::normal_distribution<GLfloat> distribution(0.0,1.0);
+  float h = 0.2f;
 
-  /* width of squares */
-  unsigned int width = ter.final_res - 1;
+  for(unsigned int width = ter.final_res - 1;width > 1;width /=2,h/=2.0){
+    const unsigned int half_width = width/2;
+
+    /* square step, get average of points in square around midpoint */
+    /* during iterations, x,y are top left corner of squares */
+    for(unsigned int x = 0;x < ter.final_res - 1;x+=width){
+        for(unsigned int y = 0;y<ter.final_res - 1;y+=width){
+        float avg = ter.heights[one_d_index(x,y,ter.final_res)] + /* top left */
+        ter.heights[one_d_index(x+width,y,ter.final_res)] + /* top right */
+        ter.heights[one_d_index(x,y+width,ter.final_res)] + /* bottom left */
+        ter.heights[one_d_index(x+width,y+width,ter.final_res)]; /* bottom right */
+        avg = avg / 4.0f;
+        avg = avg + (distribution(generator)*2*h) - h;
+        ter.heights[one_d_index(x+half_width,y+half_width,ter.final_res)] = avg;
+      }
+    }
+
+    /* diamond step, get average of points in diamond around midpoint */
+    /* during iterations, x,y are center point of diamond */
+    for(unsigned int x = 0;x < width; x+=half_width){
+      for(unsigned int y = (x+half_width)%width;y<width;y+=width){
+        float avg = ter.heights[one_d_index((x-half_width)%width,y,ter.final_res)] +
+        ter.heights[one_d_index((x+half_width)%width,y,ter.final_res)] +
+        ter.heights[one_d_index(x,(y+half_width)%width,ter.final_res)] +
+        ter.heights[one_d_index(x,(y-half_width+width)%width,ter.final_res)];
+        avg /= 4.0f;
+
+        avg = avg + (distribution(generator)*2*h) - h;
+        ter.heights[one_d_index(x,y,ter.final_res)] = avg;
+      }
+    }
+  }
 }

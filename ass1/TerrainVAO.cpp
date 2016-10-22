@@ -77,13 +77,11 @@ void TerrainVAO::createVertices(GLfloat* heights){
   for(unsigned int j = 0;j<this->width;j++){
     for(unsigned int i = 0;i<this->width;i++){
       const unsigned int offset = vertex_width*i + vertex_width*j*this->width;
-      printf("(%d,%d) ",i,j);
       this->vertices[offset] = i * ratio;
       this->vertices[offset + 1] = j * ratio;
       this->vertices[offset + 2] = heights[one_d_index(i,j,this->width)];
       this->vertices[offset + 3] = 1.0;
     }
-    printf("\n");
   }
 }
 
@@ -98,8 +96,7 @@ void TerrainVAO::createNormals(){
     ntable[i].w = 0;
   }
 
-  /* loop over each triangle */
-  printf("FACE NORMS\n");
+  /* loop over each triangle (each triangle is 3 successive indices) */
   for(unsigned int i = 0; i < num_indices; i+=3){
     /* get index to each vertex */
     const unsigned int vind1 = this->indices[i]*this->vertex_width;
@@ -150,7 +147,6 @@ void TerrainVAO::createNormals(){
   }
 
   delete[] ntable;
-  this->printNormals();
 }
 
 void TerrainVAO::populateBuffers(){

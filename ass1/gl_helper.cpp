@@ -46,7 +46,7 @@ void displayFunc(void) {
   const glm::mat4 view = camera.view() * y2zup;
   const glm::mat4 projection = camera.projection();
   const glm::vec3 eye = camera.position();
-  const glm::vec3 light = glm::vec3(1.0,1.0,1.0);
+  const glm::vec3 light = glm::vec3(1.0,1.0,5.0);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -79,24 +79,25 @@ void mouseDragFunc(int x, int y){
 
 void keyboardFunc(unsigned char key, int x, int y) {
   #define ESC_KEY 27
+  const float ms = 5.0f; /* movespeed */
     switch (key) {
     case 'a':
-      camera.offsetPosition(-camera.right());
+      camera.offsetPosition(-camera.right()*ms);
       break;
     case 'd':
-      camera.offsetPosition(camera.right());
+      camera.offsetPosition(camera.right()*ms);
       break;
     case 'w':
-      camera.offsetPosition(camera.forward());
+      camera.offsetPosition(camera.forward()*ms);
       break;
     case 's':
-      camera.offsetPosition(-camera.forward());
+      camera.offsetPosition(-camera.forward()*ms);
       break;
 		case 'z':
-      camera.offsetPosition(camera.up());
+      camera.offsetPosition(camera.up()*ms);
 			break;
 		case 'x':
-      camera.offsetPosition(-camera.up());
+      camera.offsetPosition(-camera.up()*ms);
 			break;
     case ESC_KEY:
       exit(0);
@@ -136,6 +137,7 @@ void ter_gl_init(int argc, char** argv){
 
   camera.lookAt(glm::vec3(1.0,1.0,1.0));
   camera.setPosition(glm::vec3(1.0,4.0,1.0));
+  camera.setNearAndFarPlanes(0.01f,4096.0f);
 
   glutSetCursor(GLUT_CURSOR_NONE);
 

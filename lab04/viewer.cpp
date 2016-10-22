@@ -278,7 +278,7 @@ int main(int argc, char **argv) {
     int vs;
 
 		glutInit(&argc, argv);
-		glutInitContextVersion(4,3);
+		glutInitContextVersion(3,3);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(320, 320);

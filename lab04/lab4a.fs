@@ -2,7 +2,7 @@
  *  Simple fragment sharder for Lab 2
  */
 
-#version 430 core
+#version 330 core
 
 in vec3 position;
 in vec3 normal;
