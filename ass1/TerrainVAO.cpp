@@ -3,15 +3,19 @@
 #include "util.hpp"
 #include <glm/glm.hpp>
 
-TerrainVAO::TerrainVAO(GLuint sp, GLuint tid,struct terrain& ter)
-:texture(tid),
-vertices(NULL),
+TerrainVAO::TerrainVAO(GLuint sp, struct Texture1D& texture,struct terrain& ter)
+:vertices(NULL),
 normals(NULL),
 indices(NULL),
+texels(NULL),
 ratio(ter.world_size / ter.final_res),
-shader_program(sp)
+shader_program(sp),
+min(ter.min),
+max(ter.max)
 {
+  printf("MIN MAX: %f %f\n",this->min,this->max);
   glGenVertexArrays(1,&this->id);
+  loadTexture(texture);
   loadTer(ter);
   createNormals();
   populateBuffers();
@@ -25,6 +29,8 @@ TerrainVAO::~TerrainVAO(){
     delete[] this->normals;
   if(indices)
     delete[] this->indices;
+  if(texels)
+    delete[] this->texels;
 }
 
 void TerrainVAO::setShader(GLuint sp){
@@ -41,6 +47,14 @@ void TerrainVAO::loadTer(struct terrain& ter){
   this->num_indices = 6*(this->width - 1)*(this->width - 1);
   linkVertices();
   createVertices(ter.heights);
+}
+
+void TerrainVAO::loadTexture(struct Texture1D& texture){
+  this->num_texels = texture.size/COLOUR_BYTE;
+  this->texels = new GLfloat[texture.size];
+  for(int i = 0;i < texture.size;i++){
+    this->texels[i] = texture.colour[i]/COLOUR_RANGE;
+  }
 }
 
 void TerrainVAO::drawVAO(){
@@ -155,8 +169,9 @@ void TerrainVAO::populateBuffers(){
   const size_t nbsize = normal_width*this->num_vertices * sizeof(GLfloat); /* ditto for normals */
   const size_t ibsize = this->num_indices*sizeof(GLuint); /* ditto indices buffer  */
 
-  /* load vertex data into buffer */
   glBindVertexArray(this->id);
+
+  /* load vertex data into buffer */
   glGenBuffers(1,&this->vbuffer);
   glBindBuffer(GL_ARRAY_BUFFER,this->vbuffer);
   glBufferData(GL_ARRAY_BUFFER,(vbsize + nbsize),NULL,GL_STATIC_DRAW);
@@ -168,6 +183,16 @@ void TerrainVAO::populateBuffers(){
   glGenBuffers(1,&this->ibuffer);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,this->ibuffer);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER,ibsize,this->indices,GL_STATIC_DRAW);
+
+  /* load texels into buffer */
+  glGenTextures(1,&this->tbuffer);
+  glActiveTexture(GL_TEXTURE0);
+  glBindTexture(GL_TEXTURE_1D,this->tbuffer);
+  glTexImage1D(GL_TEXTURE_1D,0,GL_RGBA32F,this->num_texels,0,GL_RGBA,GL_FLOAT,this->texels);
+
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
   /* link buffers to shader programs */
   glUseProgram(this->shader_program);

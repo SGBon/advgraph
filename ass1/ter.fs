@@ -8,13 +8,21 @@ uniform mat4 modelView;
 uniform mat4 projection;
 uniform vec3 light;
 uniform vec3 eye;
+
+uniform sampler1D tex;
+uniform vec2 minmax;
+
 in vec3 position;
 in vec3 normal;
 out vec4 fragcolor;
 
+float compnorm(float val, float mini, float maxi){
+	return (val - mini)/(maxi - mini);
+}
+
 void main() {
 	vec4 white = vec4(1.0,1.0,1.0,1.0);
-	vec4 base = vec4(1.0,0.0,0.0,0.0);
+	vec4 base = texture(tex,compnorm(position.z,minmax.x,minmax.y));
 	float diffuse;
 	vec3 L = normalize(light - position);
 	vec3 N;

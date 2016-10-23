@@ -15,18 +15,22 @@ struct terrain ter_read(std::string filename){
   infile >> ret.world_size;
   infile >> ret.final_res;
   infile >> ret.init_res;
+  ret.min = 999999;
+  ret.max = -999999;
 
-  //const unsigned int n = ret.init_res;
   const unsigned int hnum = ret.final_res * ret.final_res;
+  const unsigned int space = (ret.final_res - 1)/(ret.init_res-1);
 
   ret.heights = new GLfloat[hnum];
   for(unsigned int i = 0;i<hnum;i++)
     ret.heights[i] = 0;
 
-  for(unsigned int j = 0; j<ret.final_res;j+=ret.final_res-1){
-    for(unsigned int i = 0;i<ret.final_res;i+=ret.final_res-1){
+  for(unsigned int j = 0; j<ret.final_res;j+=space){
+    for(unsigned int i = 0;i<ret.final_res;i+=space){
       infile >> ret.heights[one_d_index(i,j,ret.final_res)];
+      printf("%.2f ",ret.heights[one_d_index(i,j,ret.final_res)]);
     }
+    printf("\n");
   }
   infile.close();
 
@@ -42,7 +46,7 @@ void ter_generate(struct terrain& ter){
   /* Random number generator, obviously from STL as you can see from the syntax */
   std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
   std::normal_distribution<GLfloat> distribution(0.0,1.0);
-  float h = 0.2f; /* this is a nice starting value */
+  float h = 0.35f; /* this is a nice starting value */
 
   for(unsigned int width = ter.final_res - 1;width > 1;width /=2,h/=2.0){
     const unsigned int half_width = width/2;
@@ -73,10 +77,17 @@ void ter_generate(struct terrain& ter){
 
         avg = avg + (distribution(generator)*2*h) - h;
         ter.heights[one_d_index(x,y,ter.final_res)] = avg;
-
         if(x == 0) ter.heights[one_d_index(ter.final_res-1,y,ter.final_res)] = avg;
         if(y == 0) ter.heights[one_d_index(x,ter.final_res-1,ter.final_res)] = avg;
       }
     }
+  }
+
+  /* get min and max */
+  for(int i = 0;i<ter.final_res*ter.final_res;i++){
+    if(ter.heights[i] < ter.min)
+      ter.min = ter.heights[i];
+    if(ter.heights[i] > ter.max)
+      ter.max = ter.heights[i];
   }
 }

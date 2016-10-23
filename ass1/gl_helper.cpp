@@ -49,7 +49,7 @@ void displayFunc(void) {
   const glm::mat4 view = camera.view() * y2zup;
   const glm::mat4 projection = camera.projection();
   const glm::vec3 eye = camera.position();
-  const glm::vec3 light = glm::vec3(1.0,1.0,5.0);
+  const glm::vec3 light = glm::vec3(0.0,0.0,1.0);
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -69,6 +69,12 @@ void displayFunc(void) {
 
     int lightLoc = glGetUniformLocation(program,"light");
     glUniform3f(lightLoc,light.x,light.y,light.z);
+
+    int hrLoc = glGetUniformLocation(program,"heightratio");
+    glUniform1f(hrLoc,1.0f);
+
+    int mxLoc = glGetUniformLocation(program,"minmax");
+    glUniform2f(mxLoc,currvao->min,currvao->max);
 
     currvao->drawVAO();
   }
@@ -153,7 +159,7 @@ void ter_gl_init(int argc, char** argv){
  * to move several grid units per movement
  */
 void setMS(const float world_size,const float grid_res){
-  movespeed = (world_size/grid_res) * 5.0f;
+  movespeed = (world_size/grid_res) * 10.0f;
 };
 
 void add_vao(TerrainVAO* vao){

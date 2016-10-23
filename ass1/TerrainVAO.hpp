@@ -6,25 +6,29 @@
 #include <GL/glut.h>
 #include <GL/freeglut_ext.h>
 #include "tertype.h"
+#include "Texture1D.hpp"
 
 class TerrainVAO{
 private:
   GLuint id;
   GLuint vbuffer;
   GLuint ibuffer;
-  GLuint texture;
+  GLuint tbuffer;
 
   /* pointers to vertices, indices */
   GLfloat* vertices;
   GLfloat* normals;
   GLuint* indices;
+  GLfloat* texels;
 
   /* total number of vertices,indices */
   GLuint num_vertices;
   GLuint num_indices;
+  GLuint num_texels;
 
   static const unsigned char vertex_width = 4; /* size of single vertex in OpenGL */
   static const unsigned char normal_width = 3; /* size of single vertex normal */
+  static const unsigned char texel_width = 4; /* size of single texel */
 
   unsigned int width; /* size of grid sides */
   const float ratio; /* ratio between grid space and world space */
@@ -48,14 +52,19 @@ private:
   void populateBuffers();
 
 public:
+  float min,max; /* minimum and maximum heights */
+
   /* constructor from terrain struct, shader program id, and texture */
-  TerrainVAO(GLuint shader_program, GLuint texture_id, struct terrain& ter);
+  TerrainVAO(GLuint shader_program, struct Texture1D& texture, struct terrain& ter);
 
   /* deconstructor */
   ~TerrainVAO();
 
   /* load a terrain struct into the VAO */
   void loadTer(struct terrain& ter);
+
+  /* load a Texture1D struct into the VAO */
+  void loadTexture(struct Texture1D& texture);
 
   /* set shader program for this VAO */
   void setShader(GLuint shader_program);
