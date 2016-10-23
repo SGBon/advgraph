@@ -15,6 +15,7 @@ struct terrain ter_read(std::string filename){
   infile >> ret.world_size;
   infile >> ret.final_res;
   infile >> ret.init_res;
+  infile >> ret.h;
   ret.min = 999999;
   ret.max = -999999;
 
@@ -44,7 +45,7 @@ void ter_generate(struct terrain& ter){
   /* Random number generator, obviously from STL as you can see from the syntax */
   std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
   std::normal_distribution<GLfloat> distribution(0.0,1.0);
-  float h = 0.35f; /* this is a nice starting value */
+  float h = ter.h; /* this is a nice starting value */
 
   for(unsigned int width = ter.final_res - 1;width > 1;width /=2,h/=2.0){
     const unsigned int half_width = width/2;

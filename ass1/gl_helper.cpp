@@ -17,8 +17,10 @@ static tdogl::Camera camera;
 /* default value */
 static float movespeed = 1.0f;
 
-const unsigned short WINDOW_WIDTH = 640;
-const unsigned short WINDOW_CENTER = WINDOW_WIDTH/2;
+const unsigned short WINDOW_WIDTH = 1024;
+const unsigned short WINDOW_HEIGHT = 640;
+const unsigned short WINDOW_CENTER_X = WINDOW_WIDTH/2;
+const unsigned short WINDOW_CENTER_Y = WINDOW_HEIGHT/2;
 
 /* callback when exiting program */
 void cleanup();
@@ -83,7 +85,7 @@ void displayFunc(void) {
 
 void mouseDragFunc(int x, int y){
   const float sensitivity = 0.1f;
-  camera.offsetOrientation((y - WINDOW_CENTER)*sensitivity,(x - WINDOW_CENTER)*sensitivity);
+  camera.offsetOrientation((y - WINDOW_CENTER_Y)*sensitivity,(x - WINDOW_CENTER_X)*sensitivity);
 }
 
 void keyboardFunc(unsigned char key, int x, int y) {
@@ -114,7 +116,7 @@ void keyboardFunc(unsigned char key, int x, int y) {
 }
 
 void idleFunc(void){
-  glutWarpPointer(WINDOW_CENTER,WINDOW_CENTER);
+  glutWarpPointer(WINDOW_CENTER_X,WINDOW_CENTER_Y);
   glutPostRedisplay();
 }
 
@@ -123,8 +125,8 @@ void ter_gl_init(int argc, char** argv){
   glutInitContextVersion(3,3);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
   glutInitWindowPosition(100, 100);
-  glutInitWindowSize(WINDOW_WIDTH, WINDOW_WIDTH);
-  glutCreateWindow("Viewer");
+  glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+  glutCreateWindow("Terrain Generator");
 
   glewExperimental = GL_TRUE;
   GLenum error = glewInit();

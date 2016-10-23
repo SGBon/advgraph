@@ -1,16 +1,13 @@
 #ifndef TERGEN_TEXTURE_1D_H
 #define TERGEN_TEXTURE_1D_H
-#include <GL/glew.h>
-#include <GL/glut.h>
-#include <GL/freeglut_ext.h>
+#include <GL/gl.h>
 #include <glm/glm.hpp>
 #include <vector>
 
-#define COLOUR_BYTE 4
-#define COLOUR_RANGE 255.0f
+#define COLOUR_WIDTH 4
 
 struct Texture1D{
-  unsigned char* colour; /* colours in texture */
+  GLfloat* colour; /* colours in texture */
   unsigned int size; /* size in bytes of texture */
 };
 

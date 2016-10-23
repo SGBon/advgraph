@@ -1,5 +1,5 @@
 CXX=g++
-CFLAGS=-c -Wall -Wextra -g3 -std=c++11 -Wno-write-strings -D DEBUG
+CFLAGS=-c -Wall -Wextra -g3 -std=c++11 -Wno-write-strings
 LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
 SOURCES=Shaders.cpp tergen.cpp terproc.cpp util.cpp gl_helper.cpp\

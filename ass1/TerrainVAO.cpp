@@ -49,10 +49,10 @@ void TerrainVAO::loadTer(struct terrain& ter){
 }
 
 void TerrainVAO::loadTexture(struct Texture1D& texture){
-  this->num_texels = texture.size/COLOUR_BYTE;
+  this->num_texels = texture.size/COLOUR_WIDTH;
   this->texels = new GLfloat[texture.size];
   for(unsigned int i = 0;i < texture.size;i++){
-    this->texels[i] = texture.colour[i]/COLOUR_RANGE;
+    this->texels[i] = texture.colour[i];
   }
 }
 
