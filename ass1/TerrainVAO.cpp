@@ -13,7 +13,6 @@ shader_program(sp),
 min(ter.min),
 max(ter.max)
 {
-  printf("MIN MAX: %f %f\n",this->min,this->max);
   glGenVertexArrays(1,&this->id);
   loadTexture(texture);
   loadTer(ter);
@@ -52,7 +51,7 @@ void TerrainVAO::loadTer(struct terrain& ter){
 void TerrainVAO::loadTexture(struct Texture1D& texture){
   this->num_texels = texture.size/COLOUR_BYTE;
   this->texels = new GLfloat[texture.size];
-  for(int i = 0;i < texture.size;i++){
+  for(unsigned int i = 0;i < texture.size;i++){
     this->texels[i] = texture.colour[i]/COLOUR_RANGE;
   }
 }

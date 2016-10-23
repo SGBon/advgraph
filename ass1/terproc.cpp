@@ -28,9 +28,7 @@ struct terrain ter_read(std::string filename){
   for(unsigned int j = 0; j<ret.final_res;j+=space){
     for(unsigned int i = 0;i<ret.final_res;i+=space){
       infile >> ret.heights[one_d_index(i,j,ret.final_res)];
-      printf("%.2f ",ret.heights[one_d_index(i,j,ret.final_res)]);
     }
-    printf("\n");
   }
   infile.close();
 
@@ -84,7 +82,7 @@ void ter_generate(struct terrain& ter){
   }
 
   /* get min and max */
-  for(int i = 0;i<ter.final_res*ter.final_res;i++){
+  for(unsigned int i = 0;i<ter.final_res*ter.final_res;i++){
     if(ter.heights[i] < ter.min)
       ter.min = ter.heights[i];
     if(ter.heights[i] > ter.max)
