@@ -6,7 +6,7 @@ SOURCES=Shaders.cpp tergen.cpp terproc.cpp util.cpp gl_helper.cpp\
 TerrainVAO.cpp Camera.cpp Texture1D.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPEND=.depend
-EXECUTABLE=tergen
+EXECUTABLE=tergen.exe
 
 all: $(SOURCES) $(EXECUTABLE) depend
 
