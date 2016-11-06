@@ -1,11 +1,11 @@
-CXX=clang++
+CXX=g++
 CFLAGS=-c -Wall -Wextra -g3 -std=c++11 -Wno-write-strings
 LIBS=-lGL -lglut -lGLU -lGLEW -lm -lfreeimage
 LDFLAGS=$(LIBS)
-SOURCES=viewer.cpp Shaders.cpp tiny_obj_loader.cpp texture.cpp
+SOURCES=viewer.cpp Shaders.cpp tiny_obj_loader.cpp texture.cpp VAO.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPEND=.depend
-EXECUTABLE=diffuse
+EXECUTABLE=diffuse.exe
 
 all: $(SOURCES) $(EXECUTABLE) depend
 

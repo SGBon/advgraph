@@ -18,8 +18,6 @@
 #include <cmath>
 #include <cstdio>
 #include "Shaders.h"
-#include "tiny_obj_loader.h"
-#include "texture.h"
 #include "VAO.h"
 #include <iostream>
 
@@ -32,121 +30,17 @@ GLuint program;
 
 glm::mat4 projection;
 
-GLuint objVAO;
-int triangles;
+#define NUM_OBJECTS 1
+
+struct VAO objects[NUM_OBJECTS];
 
 void init() {
-    GLuint vbuffer;
-    GLuint ibuffer;
-    GLuint tbuffer;
-    GLint vPosition;
-    GLint vNormal;
-    GLint vTex;
-    GLfloat *vertices;
-    GLfloat *normals;
-    GLuint *indices;
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> materials;
-    int nv;
-    int nn;
-    int ni;
-    int i;
-
-    struct VAO sphere;
-
-    glGenVertexArrays(1, &objVAO);
-    glBindVertexArray(objVAO);
+    VAO_init(&objects[0]);
+    objects[0].program = program;
 
     /*  Load the obj file into the VAO */
-    VAO_loadObj("sphere.obj",&sphere);
-
-    /*  Retrieve the vertex coordinate data */
-
-    nv = shapes[0].mesh.positions.size();
-    vertices = new GLfloat[nv];
-    for (i = 0; i<nv; i++) {
-        vertices[i] = shapes[0].mesh.positions[i];
-    }
-
-    /*  Retrieve the vertex normals */
-
-    nn = shapes[0].mesh.normals.size();
-    normals = new GLfloat[nn];
-    for (i = 0; i<nn; i++) {
-        normals[i] = shapes[0].mesh.normals[i];
-    }
-
-    /*  Retrieve the triangle indices */
-
-    ni = shapes[0].mesh.indices.size();
-    triangles = ni / 3;
-    indices = new GLuint[ni];
-    for (i = 0; i<ni; i++) {
-        indices[i] = shapes[0].mesh.indices[i];
-    }
-
-    unsigned int verts = nv/3;
-    unsigned int nt = 2*verts;
-    GLfloat *tex = new GLfloat[nt];
-    for(i = 0;i<verts;i++){
-      double x = vertices[3*i];
-      double y = vertices[3*i+1];
-      double z = vertices[3*i+2];
-
-      double th = atan2(x,z);
-      double ph = atan2(y,sqrt(x*x+z*z));
-
-      tex[2*i] = fabs(th)/M_PI;
-      tex[2*i+1] = ph / M_PI;
-    }
-
-    /*
-    *  load the vertex coordinate data
-    */
-    glGenBuffers(1, &vbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vbuffer);
-    glBufferData(GL_ARRAY_BUFFER, (nv + nn + nt)*sizeof(GLfloat), NULL, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, nv*sizeof(GLfloat), vertices);
-    glBufferSubData(GL_ARRAY_BUFFER, nv*sizeof(GLfloat), nn*sizeof(GLfloat), normals);
-    glBufferSubData(GL_ARRAY_BUFFER,(nv+nn)*sizeof(GLfloat),nt*sizeof(GLfloat),tex);
-
-    /*
-    *  load the vertex indexes
-    */
-    glGenBuffers(1, &ibuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, ni*sizeof(GLuint), indices, GL_STATIC_DRAW);
-
-    /* load texture and put into buffer */
-    Cube *texture = loadCube("vcc");
-    glGenTextures(1,&tbuffer);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D,tbuffer);
-    for(i = 0;i<6;i++){
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,0,GL_RGBA,texture->width,texture->height,0,GL_RGB,GL_UNSIGNED_BYTE,texture->data[i]);
-    }
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MIN_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_MAG_FILTER,GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_R,GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_S,GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
-    /*
-    *  link the vertex coordinates to the vPosition
-    *  variable in the vertex program.  Do the same
-    *  for the normal vectors.
-    */
-    glUseProgram(program);
-    vPosition = glGetAttribLocation(program, "vPosition");
-    glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-    glEnableVertexAttribArray(vPosition);
-
-    vNormal = glGetAttribLocation(program, "vNormal");
-    glVertexAttribPointer(vNormal, 3, GL_FLOAT, GL_FALSE, 0, (void*)(nv*sizeof(GLfloat)));
-    glEnableVertexAttribArray(vNormal);
-
-    vTex = glGetAttribLocation(program,"vTex");
-    glVertexAttribPointer(vTex,2,GL_FLOAT,GL_FALSE,0,(void*)((nv+nn)*sizeof(GLfloat)));
-    glEnableVertexAttribArray(vTex);
+    VAO_loadObj(&objects[0],"sphere.obj",1);
+    VAO_loadCubeMap(&objects[0],"vcc");
 }
 
 void changeSize(int w, int h) {
@@ -175,29 +69,30 @@ void displayFunc(void) {
     int materialLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glUseProgram(program);
+    for(int i = 0; i < NUM_OBJECTS;i++){
+      glUseProgram(objects[i].program);
 
-    view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f));
+      view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
+          glm::vec3(0.0f, 0.0f, 0.0f),
+          glm::vec3(0.0f, 0.0f, 1.0f));
 
-    viewLoc = glGetUniformLocation(program, "modelView");
-    glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(view));
-    projLoc = glGetUniformLocation(program, "projection");
-    glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
+      viewLoc = glGetUniformLocation(program, "modelView");
+      glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(view));
+      projLoc = glGetUniformLocation(program, "projection");
+      glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
-    colourLoc = glGetUniformLocation(program,"colour");
-    glUniform4f(colourLoc,1.0,0.0,0.0,1.0);
-    eyeLoc = glGetUniformLocation(program,"Eye");
-    glUniform3f(eyeLoc,eyex,eyey,eyez);
-    lightLoc = glGetUniformLocation(program,"light");
-    glUniform3f(lightLoc,1.0,1.0,1.0);
-    materialLoc = glGetUniformLocation(program,"material");
-    glUniform4f(materialLoc,0.3,0.7,0.7,150.0);
+      colourLoc = glGetUniformLocation(program,"colour");
+      glUniform4f(colourLoc,1.0,0.0,0.0,1.0);
+      eyeLoc = glGetUniformLocation(program,"Eye");
+      glUniform3f(eyeLoc,eyex,eyey,eyez);
+      lightLoc = glGetUniformLocation(program,"light");
+      glUniform3f(lightLoc,1.0,1.0,1.0);
+      materialLoc = glGetUniformLocation(program,"material");
+      glUniform4f(materialLoc,0.3,0.7,0.7,150.0);
 
-    glBindVertexArray(objVAO);
-    glDrawElements(GL_TRIANGLES, 3*triangles, GL_UNSIGNED_INT, NULL);
-
+      glBindVertexArray(objects[i].id);
+      glDrawElements(GL_TRIANGLES, objects[i].num_indices, GL_UNSIGNED_INT, NULL);
+    }
     glutSwapBuffers();
 }
 
