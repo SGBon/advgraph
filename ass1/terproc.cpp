@@ -47,7 +47,7 @@ void ter_generate(struct terrain& ter){
   std::normal_distribution<GLfloat> distribution(0.0,1.0);
   float h = ter.h; /* this is a nice starting value */
 
-  for(unsigned int width = ter.final_res - 1;width > 1;width /=2,h/=2.0){
+  for(unsigned int width = (ter.final_res - 1)/(ter.init_res-1);width > 1;width /=2,h/=2.0){
     const unsigned int half_width = width/2;
 
     /* square step, get average of points in square around midpoint */
