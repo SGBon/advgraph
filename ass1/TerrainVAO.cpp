@@ -170,12 +170,24 @@ void TerrainVAO::populateBuffers(){
 
   glBindVertexArray(this->id);
 
+  GLfloat *inter = new GLfloat[vbsize + nbsize];
+  size_t index = 0;
+  for(size_t i = 0; i < this->num_vertices;i++){
+    inter[index++] = this->vertices[vertex_width*i];
+    inter[index++] = this->vertices[vertex_width*i+1];
+    inter[index++] = this->vertices[vertex_width*i+2];
+    inter[index++] = this->vertices[vertex_width*i+3];
+    inter[index++] = this->normals[normal_width*i];
+    inter[index++] = this->normals[normal_width*i+1];
+    inter[index++] = this->normals[normal_width*i+2];
+  }
+
   /* load vertex data into buffer */
   glGenBuffers(1,&this->vbuffer);
   glBindBuffer(GL_ARRAY_BUFFER,this->vbuffer);
-  glBufferData(GL_ARRAY_BUFFER,(vbsize + nbsize),NULL,GL_STATIC_DRAW);
-  glBufferSubData(GL_ARRAY_BUFFER,0,vbsize,this->vertices);
-  glBufferSubData(GL_ARRAY_BUFFER,vbsize,nbsize,this->normals);
+  glBufferData(GL_ARRAY_BUFFER,(vbsize + nbsize),inter,GL_STATIC_DRAW);
+  //glBufferSubData(GL_ARRAY_BUFFER,0,vbsize,this->vertices);
+  //glBufferSubData(GL_ARRAY_BUFFER,vbsize,nbsize,this->normals);
 
   /* load indices into buffer */
   glBindVertexArray(this->id);
@@ -196,11 +208,11 @@ void TerrainVAO::populateBuffers(){
   /* link buffers to shader programs */
   glUseProgram(this->shader_program);
   GLint vPosition = glGetAttribLocation(this->shader_program,"vPosition");
-  glVertexAttribPointer(vPosition,4,GL_FLOAT,GL_FALSE,0,0);
+  glVertexAttribPointer(vPosition,4,GL_FLOAT,GL_FALSE,(vertex_width+normal_width)*sizeof(GLfloat),0);
   glEnableVertexAttribArray(vPosition);
 
   GLint vNormal = glGetAttribLocation(this->shader_program,"vNormal");
-  glVertexAttribPointer(vNormal,3,GL_FLOAT,GL_FALSE,0,(void*)vbsize);
+  glVertexAttribPointer(vNormal,3,GL_FLOAT,GL_FALSE,(vertex_width+normal_width)*sizeof(GLfloat),(void*)(vertex_width*sizeof(GLfloat)));
   glEnableVertexAttribArray(vNormal);
 }
 

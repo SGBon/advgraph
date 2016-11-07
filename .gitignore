@@ -3,4 +3,4 @@ build/
 *.o
 *.bin
 .depend
-tergen
+*.exe

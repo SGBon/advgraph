@@ -1,12 +1,11 @@
 CXX=g++
-CFLAGS=-c -Wall -Wextra -O2 -std=c++11 -Wno-write-strings
-LIBS=-lGL -lglut -lGLU -lGLEW -lm
+CFLAGS=-c -Wall -Wextra -g3 -std=c++11 -Wno-write-strings
+LIBS=-lGL -lglut -lGLU -lGLEW -lm -lfreeimage
 LDFLAGS=$(LIBS)
-SOURCES=Shaders.cpp tergen.cpp terproc.cpp util.cpp gl_helper.cpp\
-TerrainVAO.cpp Camera.cpp Texture1D.cpp
+SOURCES=viewer.cpp Shaders.cpp tiny_obj_loader.cpp texture.cpp VAO.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPEND=.depend
-EXECUTABLE=tergen.exe
+EXECUTABLE=diffuse.exe
 
 all: $(SOURCES) $(EXECUTABLE) depend
 
