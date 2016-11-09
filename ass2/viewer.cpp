@@ -39,8 +39,10 @@ void init() {
     objects[0].program = program;
 
     /*  Load the obj file into the VAO */
-    VAO_loadObj(&objects[0],"sphere.obj",1);
+    VAO_loadObj(&objects[0],"sphere.obj");
     VAO_loadCubeMap(&objects[0],"vcc");
+
+
 }
 
 void changeSize(int w, int h) {
@@ -164,7 +166,7 @@ int main(int argc, char **argv) {
 
     theta = 1.5;
     phi = 1.5;
-    r = 10.0;
+    r = 5.0;
 
     glutMainLoop();
 }

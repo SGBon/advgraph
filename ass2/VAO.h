@@ -4,11 +4,15 @@
 #include <stdlib.h>
 #include "texture.h"
 
+#define VERT_WIDTH 3
+#define NORM_WIDTH 3
+#define TEX_WIDTH 3
+
 struct VAO{
   /* pointers to texture in union */
   union text_p{
-    Texture *t;
-    Cube *c;
+    struct Texture *t;
+    struct Cube *c;
   }texture;
 
   /* texture state */
@@ -19,10 +23,15 @@ struct VAO{
     post_buffer /* after buffers filled */
   } t_state,b_state; /* texture state, buffer state */
 
+
+  /* buffers */
+  GLfloat *vertices;
+  GLfloat *normals;
+  GLuint *indices;
+
   /* buffer sizes */
   size_t num_vertices;
   size_t num_normals;
-  size_t num_texels;
   size_t num_indices;
 
   GLuint id; /* identifier for the VAO */
@@ -32,19 +41,13 @@ struct VAO{
   GLuint vbuffer;
   GLuint ibuffer;
   GLuint tbuffer;
-
-  /* buffers */
-  GLfloat *vertices;
-  GLfloat *normals;
-  GLfloat *texels;
-  GLuint *indices;
 };
 
 /* clears some data in struct */
 void VAO_init(struct VAO *vao);
 
 /* create a VAO from a .obj file stored in filename */
-void VAO_loadObj(struct VAO *vao, char *filename, unsigned char is_sphere);
+void VAO_loadObj(struct VAO *vao, char *filename);
 
 /* release memory allocated to the VAO */
 void VAO_destroy(struct VAO *vao);

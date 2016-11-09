@@ -6,7 +6,6 @@
 
 in vec3 normal;
 in vec3 position;
-in vec2 tc;
 uniform samplerCube tex;
 uniform vec4 colour;
 uniform vec3 Eye;
