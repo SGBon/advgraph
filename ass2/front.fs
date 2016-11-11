@@ -7,10 +7,7 @@
 in vec3 normal;
 in vec3 position;
 uniform samplerCube tex;
-uniform vec4 colour;
 uniform vec3 Eye;
-uniform vec3 light;
-uniform vec4 material;
 out vec4 fragcolor;
 
 /* compute R0 coefficient in schlick approximation */

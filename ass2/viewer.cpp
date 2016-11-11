@@ -73,12 +73,9 @@ void changeSize(int w, int h) {
 void displayFunc(void) {
     glm::mat4 view;
     glm::mat4 model;
-    int viewLoc;
-    int projLoc;
-    int colourLoc;
-    int eyeLoc;
-    int lightLoc;
-    int materialLoc;
+    GLint viewLoc;
+    GLint projLoc;
+    GLint eyeLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(int i = 0; i < NUM_OBJECTS;i++){
@@ -95,14 +92,8 @@ void displayFunc(void) {
       projLoc = glGetUniformLocation(program, "projection");
       glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
-      colourLoc = glGetUniformLocation(program,"colour");
-      glUniform4f(colourLoc,1.0,0.0,0.0,1.0);
       eyeLoc = glGetUniformLocation(program,"Eye");
       glUniform3f(eyeLoc,eyex,eyey,eyez);
-      lightLoc = glGetUniformLocation(program,"light");
-      glUniform3f(lightLoc,1.0,1.0,1.0);
-      materialLoc = glGetUniformLocation(program,"material");
-      glUniform4f(materialLoc,0.3,0.7,0.7,150.0);
 
       glBindVertexArray(objects[i].id);
       glDrawElements(GL_TRIANGLES, objects[i].num_indices, GL_UNSIGNED_INT, NULL);
