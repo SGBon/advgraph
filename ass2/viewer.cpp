@@ -26,23 +26,32 @@ float eyex, eyey, eyez;
 double theta, phi;
 double r;
 
-GLuint program;
+GLuint frontShader;
+GLuint backShader;
 
 glm::mat4 projection;
 
-#define NUM_OBJECTS 1
+#define NUM_OBJECTS 2
 
 struct VAO objects[NUM_OBJECTS];
 
 void init() {
+    /* prepare the primary sphere */
     VAO_init(&objects[0]);
-    objects[0].program = program;
+    objects[0].program = frontShader;
 
     /*  Load the obj file into the VAO */
     VAO_loadObj(&objects[0],"sphere.obj");
     VAO_loadCubeMap(&objects[0],"vcc");
 
+    /* prepare the background sphere */
+    VAO_init(&objects[1]);
+    objects[1].program = backShader;
 
+    /* load obj into VAO */
+    VAO_loadObj(&objects[1],"sphere.obj");
+    VAO_loadCubeMap(&objects[1],"vcc");
+    VAO_setTransform(&objects[1],glm::scale(glm::mat4(1.0f),glm::vec3(10.0f,10.0f,10.0f)));
 }
 
 void changeSize(int w, int h) {
@@ -63,6 +72,7 @@ void changeSize(int w, int h) {
 
 void displayFunc(void) {
     glm::mat4 view;
+    glm::mat4 model;
     int viewLoc;
     int projLoc;
     int colourLoc;
@@ -72,14 +82,16 @@ void displayFunc(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(int i = 0; i < NUM_OBJECTS;i++){
-      glUseProgram(objects[i].program);
+      GLuint program = objects[i].program;
+      glUseProgram(program);
 
       view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
           glm::vec3(0.0f, 0.0f, 0.0f),
           glm::vec3(0.0f, 0.0f, 1.0f));
+      model = view*objects[i].transform;
 
       viewLoc = glGetUniformLocation(program, "modelView");
-      glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(view));
+      glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(model));
       projLoc = glGetUniformLocation(program, "projection");
       glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
@@ -154,10 +166,14 @@ int main(int argc, char **argv) {
     glEnable(GL_DEPTH_TEST);
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
-    vs = buildShader(GL_VERTEX_SHADER, "lab2.vs");
-    fs = buildShader(GL_FRAGMENT_SHADER, "lab2.fs");
-    program = buildProgram(vs, fs, 0);
-    dumpProgram(program, "Lab 2 shader program");
+    vs = buildShader(GL_VERTEX_SHADER, "general.vs");
+    fs = buildShader(GL_FRAGMENT_SHADER, "front.fs");
+    frontShader = buildProgram(vs, fs, 0);
+    dumpProgram(frontShader, "front sphere shader");
+
+    fs = buildShader(GL_FRAGMENT_SHADER,"back.fs");
+    backShader = buildProgram(vs,fs,0);
+    dumpProgram(backShader,"Background sphere shader");
     init();
 
     eyex = 0.0;

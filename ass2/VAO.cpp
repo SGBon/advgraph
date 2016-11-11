@@ -10,6 +10,7 @@ void VAO_genCubeTexels(struct VAO *vao);
 void VAO_init(struct VAO *vao){
   vao->t_state = VAO::undefined;
   vao->b_state = VAO::undefined;
+  vao->transform = glm::mat4(1.0);
 }
 
 void VAO_loadObj(struct VAO *vao, char *filename){
@@ -108,4 +109,8 @@ void VAO_loadCubeMap(struct VAO *vao, char *foldername){
   glTexParameteri(GL_TEXTURE_CUBE_MAP,GL_TEXTURE_WRAP_T,GL_CLAMP_TO_EDGE);
 
   vao->t_state = VAO::is_cubemap;
+}
+
+void VAO_setTransform(struct VAO *vao, glm::mat4 transform){
+  vao->transform = transform;
 }
