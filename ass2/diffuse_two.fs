@@ -17,7 +17,7 @@ void main() {
   vec3 U = cross(vec3(normal.x,normal.z,normal.y),normal);
   vec3 W = cross(U,normal);
 
-  vec3 V = normal;
+  vec3 V;
   vec3 tc;
   fragcolor = vec4(0.0,0.0,0.0,0.0);
 

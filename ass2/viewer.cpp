@@ -70,8 +70,6 @@ void changeSize(int w, int h) {
 }
 
 void displayFunc(void) {
-    glm::mat4 view;
-    glm::mat4 model;
     GLuint viewLoc;
     GLuint projLoc;
     GLuint eyeLoc;
@@ -82,13 +80,13 @@ void displayFunc(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(size_t i = 0; i < NUM_OBJECTS;i++){
-      GLuint program = objects[i].program;
+      const GLuint program = objects[i].program;
       glUseProgram(program);
 
-      view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
+      const glm::mat4 view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
           glm::vec3(0.0f, 0.0f, 0.0f),
           glm::vec3(0.0f, 0.0f, 1.0f));
-      model = view*objects[i].transform;
+      const glm::mat4 model = view*objects[i].transform;
 
       viewLoc = glGetUniformLocation(program, "modelView");
       glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(model));

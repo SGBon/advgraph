@@ -4,3 +4,5 @@ build/
 *.bin
 .depend
 *.exe
+*.odt
+*.~lock*

@@ -5,9 +5,6 @@
 #include <cmath>
 #include <cstring>
 
-void VAO_genSphereTexels(struct VAO *vao);
-void VAO_genCubeTexels(struct VAO *vao);
-
 void VAO_init(struct VAO *vao){
   vao->t_state = VAO::undefined;
   vao->b_state = VAO::undefined;
