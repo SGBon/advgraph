@@ -11,7 +11,6 @@ uniform vec3 Eye;
 out vec4 fragcolor;
 
 void main() {
-  vec3 tc = reflect(-position,normal);
   vec4 fleccomp = texture(tex,normal);
 
   fragcolor = fleccomp;
