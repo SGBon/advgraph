@@ -3,6 +3,7 @@
 #include <cstdio>
 #define _USE_MATH_DEFINES
 #include <cmath>
+#include <cstring>
 
 void VAO_genSphereTexels(struct VAO *vao);
 void VAO_genCubeTexels(struct VAO *vao);
@@ -87,7 +88,7 @@ void VAO_destroy(struct VAO *vao){
   }
 }
 
-void VAO_loadCubeMap(struct VAO *vao, char *foldername){
+void VAO_loadCubeMap(struct VAO *vao, char *foldername, unsigned int tid){
   /* bind our vao to opengl */
   glBindVertexArray(vao->id);
 
@@ -95,8 +96,8 @@ void VAO_loadCubeMap(struct VAO *vao, char *foldername){
   const Cube *texture = vao->texture.c = loadCube(foldername);
 
   glGenTextures(1,&vao->tbuffer);
-  glActiveTexture(GL_TEXTURE0);
-  glBindTexture(GL_TEXTURE_2D,vao->tbuffer);
+  glActiveTexture(GL_TEXTURE0+tid);
+  glBindTexture(GL_TEXTURE_CUBE_MAP,vao->tbuffer);
 
   /* put cubemaps into buffer */
   for(unsigned char i = 0;i<6;i++){

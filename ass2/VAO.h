@@ -55,7 +55,7 @@ void VAO_loadObj(struct VAO *vao, char *filename);
 void VAO_destroy(struct VAO *vao);
 
 /* load cubemap into VAO */
-void VAO_loadCubeMap(struct VAO *vao, char *filename);
+void VAO_loadCubeMap(struct VAO *vao, char *filename,unsigned int tid);
 
 /* set the base transform of VAO */
 void VAO_setTransform(struct VAO *vao, glm::mat4 transform);

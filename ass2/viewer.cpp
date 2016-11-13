@@ -19,7 +19,6 @@
 #include <cstdio>
 #include "Shaders.h"
 #include "VAO.h"
-#include <iostream>
 
 float eyex, eyey, eyez;
 
@@ -42,7 +41,7 @@ void init() {
 
     /*  Load the obj file into the VAO */
     VAO_loadObj(&objects[0],"sphere.obj");
-    VAO_loadCubeMap(&objects[0],"vcc");
+    VAO_loadCubeMap(&objects[0],"vcc",0);
 
     /* prepare the background sphere */
     VAO_init(&objects[1]);
@@ -50,7 +49,7 @@ void init() {
 
     /* load obj into VAO */
     VAO_loadObj(&objects[1],"sphere.obj");
-    VAO_loadCubeMap(&objects[1],"vcc");
+    VAO_loadCubeMap(&objects[1],"vcc",1);
     VAO_setTransform(&objects[1],glm::scale(glm::mat4(1.0f),glm::vec3(10.0f,10.0f,10.0f)));
 }
 
@@ -73,12 +72,15 @@ void changeSize(int w, int h) {
 void displayFunc(void) {
     glm::mat4 view;
     glm::mat4 model;
-    GLint viewLoc;
-    GLint projLoc;
-    GLint eyeLoc;
+    GLuint viewLoc;
+    GLuint projLoc;
+    GLuint eyeLoc;
+    GLuint texLoc;
+    GLuint radiusLoc;
+    GLuint thetaLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    for(int i = 0; i < NUM_OBJECTS;i++){
+    for(size_t i = 0; i < NUM_OBJECTS;i++){
       GLuint program = objects[i].program;
       glUseProgram(program);
 
@@ -89,11 +91,24 @@ void displayFunc(void) {
 
       viewLoc = glGetUniformLocation(program, "modelView");
       glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(model));
+
       projLoc = glGetUniformLocation(program, "projection");
       glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
       eyeLoc = glGetUniformLocation(program,"Eye");
       glUniform3f(eyeLoc,eyex,eyey,eyez);
+
+      texLoc = glGetUniformLocation(program,"tex");
+      glUniform1i(texLoc,i);
+
+      radiusLoc = glGetUniformLocation(program,"radius");
+      glUniform1f(radiusLoc,0.05f);
+
+      thetaLoc = glGetUniformLocation(program,"angles");
+      glUniform1f(thetaLoc,M_PI);
+
+      glActiveTexture(GL_TEXTURE0+i);
+      glBindTexture(GL_TEXTURE_CUBE_MAP,objects[i].tbuffer);
 
       glBindVertexArray(objects[i].id);
       glDrawElements(GL_TRIANGLES, objects[i].num_indices, GL_UNSIGNED_INT, NULL);
@@ -158,7 +173,7 @@ int main(int argc, char **argv) {
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
     vs = buildShader(GL_VERTEX_SHADER, "general.vs");
-    fs = buildShader(GL_FRAGMENT_SHADER, "front.fs");
+    fs = buildShader(GL_FRAGMENT_SHADER, "diffuse_two.fs");
     frontShader = buildProgram(vs, fs, 0);
     dumpProgram(frontShader, "front sphere shader");
 
@@ -169,11 +184,11 @@ int main(int argc, char **argv) {
 
     eyex = 0.0;
     eyez = 0.0;
-    eyey = 10.0;
+    eyey = 3.0;
 
     theta = 1.5;
     phi = 1.5;
-    r = 5.0;
+    r = 3.0;
 
     glutMainLoop();
 }
