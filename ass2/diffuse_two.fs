@@ -13,22 +13,7 @@ uniform float angles;
 uniform int samples;
 out vec4 fragcolor;
 
-/* rng  parameters */
-int num = 0;
-int a = 141;
-int c = 28411;
-int m = 134456;
-
-float rand(){
-  num = (a*num+c) % m;
-  float f = (num+0.0)/m;
-  return ((f-0.5)*2.0);
-}
-
 void main() {
-  num = int((normal.x*normal.y + normal.x*normal.z) *123456);
-  num = num%m;
-
   vec3 U = cross(vec3(normal.x,normal.z,normal.y),normal);
   vec3 W = cross(U,normal);
 
