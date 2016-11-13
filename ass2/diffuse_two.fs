@@ -10,6 +10,7 @@ uniform samplerCube tex;
 uniform vec3 Eye;
 uniform float radius;
 uniform float angles;
+uniform int samples;
 out vec4 fragcolor;
 
 /* rng  parameters */
@@ -35,15 +36,18 @@ void main() {
   vec3 tc;
   fragcolor = vec4(0.0,0.0,0.0,0.0);
 
-  const int samples = 100;
+  int total = samples*samples;
   float interval = angles/samples;
   for(int i = 0;i < samples;i++){
     float theta = interval * i;
-    V = (radius*cos(theta)*U) + (radius*sin(theta)*W);
-    tc = normalize(normal+V);
-    fragcolor = fragcolor + texture(tex,tc);
+    for(int j = 0;j<samples;j++){
+      float phi = interval * j;
+      V = (radius*cos(theta)*U) + (radius*sin(phi)*W);
+      tc = normalize(normal+V);
+      fragcolor = fragcolor + texture(tex,tc);
+    }
   }
 
 
-  fragcolor = fragcolor/samples;
+  fragcolor = fragcolor/total;
 }

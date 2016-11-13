@@ -78,6 +78,7 @@ void displayFunc(void) {
     GLuint texLoc;
     GLuint radiusLoc;
     GLuint thetaLoc;
+    GLuint samplesLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     for(size_t i = 0; i < NUM_OBJECTS;i++){
@@ -102,10 +103,13 @@ void displayFunc(void) {
       glUniform1i(texLoc,i);
 
       radiusLoc = glGetUniformLocation(program,"radius");
-      glUniform1f(radiusLoc,0.05f);
+      glUniform1f(radiusLoc,0.1f);
 
       thetaLoc = glGetUniformLocation(program,"angles");
-      glUniform1f(thetaLoc,M_PI);
+      glUniform1f(thetaLoc,M_PI*2);
+
+      samplesLoc = glGetUniformLocation(program,"samples");
+      glUniform1i(samplesLoc,15);
 
       glActiveTexture(GL_TEXTURE0+i);
       glBindTexture(GL_TEXTURE_CUBE_MAP,objects[i].tbuffer);
