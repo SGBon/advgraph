@@ -28,7 +28,6 @@ Draw Cube
 #include <assert.h>
 #include <string.h>
 #include <cstdlib>
-#include "cube_data.h"
 
 float *vBuffer;
 VkBuffer iBuffer;
