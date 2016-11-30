@@ -67,12 +67,14 @@ void init() {
       const float red_z = dis(gen) * side;
       boid redBoid(glm::vec3(side,base_height,red_z),tribes::RED);
       redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
+      redBoid.setGoal(-side);
       boids.push_back(redBoid);
 
 
       const float blue_z = dis(gen) * side;
       boid blueBoid(glm::vec3(-side,base_height,blue_z),tribes::BLUE);
       blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
+      blueBoid.setGoal(side);
       boids.push_back(blueBoid);
     }
 }
@@ -169,7 +171,7 @@ void idleFunc(void){
 
 void updateBoids(){
   for(unsigned int i = 0; i < boids.size();i++){
-    boids[i].step(0.1f);
+    boids[i].step(0.05f);
   }
 }
 
