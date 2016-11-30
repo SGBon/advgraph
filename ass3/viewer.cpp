@@ -171,7 +171,7 @@ void idleFunc(void){
 
 void updateBoids(){
   for(unsigned int i = 0; i < boids.size();i++){
-    boids[i].step(0.05f);
+    boids[i].step(0.1f);
   }
 }
 

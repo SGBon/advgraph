@@ -1,5 +1,6 @@
 #include "boid.hpp"
 
+
 boid::boid(const glm::vec3 startPos, enum tribes tribe):
   position(startPos),
   velocity(glm::vec3(0.0f,0.0f,0.0f)),
@@ -8,9 +9,17 @@ boid::boid(const glm::vec3 startPos, enum tribes tribe):
   tribe(tribe){}
 
 void boid::step(const float timestep){
+  const float acceleration_decay = -0.1f;
   if(!atGoal()){
     this->position += this->velocity*timestep;
     this->velocity += this->acceleration*timestep;
+
+    /* decay acceleration */
+    if(this->acceleration.x > 0){
+      this->acceleration.x += acceleration_decay*timestep;
+    }else if(this->acceleration.x < 0){
+      this->acceleration.x -= acceleration_decay*timestep;
+    }
   }
 }
 
