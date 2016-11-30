@@ -7,14 +7,15 @@
 in vec4 position;
 in vec3 normal;
 uniform vec4 base;
+uniform vec3 Eye;
 out vec4 fragcolor;
 
 void main() {
-	vec4 white = vec4(1.0, 1.0, 1.0, 1.0);
+	const vec4 white = vec4(1.0, 1.0, 1.0, 1.0);
 	float diffuse;
-	vec3 L = vec3(1.0, 3.0, 0.0);
+	vec3 L = normalize(vec3(32.0, 0.5, 0.0) - position.xyz);
 	vec3 N;
-	vec3 R = normalize(reflect(L,position.xyz));
+	vec3 H = normalize(L+(Eye - position.xyz));
 	float specular;
 
 	N = normalize(normal);
@@ -23,10 +24,9 @@ void main() {
 		diffuse = 0.0;
 		specular = 0.0;
 	} else {
-		specular = pow(max(0.0, dot(N,R)),100.0);
+		specular = pow(max(0.0, dot(N,H)),1000.0);
 	}
 
 	fragcolor = min(0.3*base + 0.7*diffuse*base + 0.7*white*specular, vec4(1.0));
 	fragcolor.a = base.a;
-
 }

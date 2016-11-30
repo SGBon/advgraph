@@ -20,6 +20,9 @@ public:
   /* set the acceleration of the boid */
   void setAcceleration(const glm::vec3 acceleration);
 
+  /* set the x coordinate that the boid has to reach */
+  void setGoal(const float goal);
+
   /* return position */
   glm::vec3 getPosition();
 
@@ -31,5 +34,9 @@ private:
   glm::vec3 velocity;
   glm::vec3 acceleration;
 
+  float goal;
+
   const enum tribes tribe;
+
+  bool atGoal();
 };

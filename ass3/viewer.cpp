@@ -9,6 +9,7 @@
 */
 
 #include <vector>
+#include <random>
 #include <cmath>
 #include <cstdio>
 #include <GL/glew.h>
@@ -39,25 +40,41 @@ std::vector<boid> boids;
 struct VAO monkey;
 struct VAO ground;
 
+void updateBoids();
+
 void init() {
-    for(unsigned int i = 0; i < NUM_TRIBE;i++){
-      boids.push_back(boid(glm::vec3(0.0f,0.0f,0.0f),tribes::RED));
-      boids.push_back(boid(glm::vec3(1.0f,0.0f,1.0f),tribes::BLUE));
-    }
-
-    /* prepare the monkey */
-    VAO_init(&monkey);
-    monkey.program = shaderProgram;
-
-    /*  Load the monkey obj file into the VAO */
-    VAO_loadObj(&monkey,"monkey.obj");
-
     /* prepare the ground */
     VAO_init(&ground);
     ground.program = shaderProgram;
 
     /* Load the ground obj into the VAO */
     VAO_loadObj(&ground,"ground.obj");
+
+    /* prepare the monkey model */
+    VAO_init(&monkey);
+    monkey.program = shaderProgram;
+
+    /*  Load the monkey obj file into the VAO */
+    VAO_loadObj(&monkey,"monkey.obj");
+
+    /* set up initial boid positions */
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<float> dis(-1,1);
+    const float base_height = 1.f;
+    const float side = 16.0f;
+    for(unsigned int i = 0; i < NUM_TRIBE;i++){
+      const float red_z = dis(gen) * side;
+      boid redBoid(glm::vec3(side,base_height,red_z),tribes::RED);
+      redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
+      boids.push_back(redBoid);
+
+
+      const float blue_z = dis(gen) * side;
+      boid blueBoid(glm::vec3(-side,base_height,blue_z),tribes::BLUE);
+      blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
+      boids.push_back(blueBoid);
+    }
 }
 
 void changeSize(int w, int h) {
@@ -85,7 +102,7 @@ void displayFunc(void) {
     const GLuint mprog = monkey.program;
     const glm::vec4 red(1.0f,0.0f,0.0f,1.0f);
     const glm::vec4 blue(0.0f,0.0f,1.0f,1.0f);
-    const glm::vec4 brown(0.3f,0.3f,0.05f,1.0f);
+    const glm::vec4 brown(0.3f,0.3f,0.1f,1.0f);
 
     const glm::mat4 view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -142,6 +159,18 @@ void displayFunc(void) {
     glDrawElements(GL_TRIANGLES, ground.num_indices, GL_UNSIGNED_INT, NULL);
 
     glutSwapBuffers();
+    updateBoids();
+}
+
+void idleFunc(void){
+  updateBoids();
+  glutPostRedisplay();
+}
+
+void updateBoids(){
+  for(unsigned int i = 0; i < boids.size();i++){
+    boids[i].step(0.1f);
+  }
 }
 
 void keyboardFunc(unsigned char key, int x, int y) {
@@ -183,7 +212,7 @@ int main(int argc, char **argv) {
 		glutInitContextVersion(3,3);
     glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
     glutInitWindowPosition(100, 100);
-    glutInitWindowSize(320, 320);
+    glutInitWindowSize(640, 640);
     glutCreateWindow("Viewer");
 
 		glewExperimental = GL_TRUE;
@@ -196,6 +225,7 @@ int main(int argc, char **argv) {
     glutDisplayFunc(displayFunc);
     glutReshapeFunc(changeSize);
     glutKeyboardFunc(keyboardFunc);
+    glutIdleFunc(idleFunc);
 
     glEnable(GL_DEPTH_TEST);
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -207,13 +237,13 @@ int main(int argc, char **argv) {
 
     init();
 
-    eyex = 0.0;
-    eyez = 0.0;
-    eyey = 3.0;
-
     theta = 1.5;
     phi = 1.5;
-    r = 3.0;
+    r = 32.0;
+
+    eyex = r*sin(theta)*cos(phi);
+    eyey = r*sin(theta)*sin(phi);
+    eyez = r*cos(theta);
 
     glutMainLoop();
 }
