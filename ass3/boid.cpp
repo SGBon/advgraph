@@ -1,5 +1,6 @@
 #include "boid.hpp"
 
+const float boid::FLOCK_RADIUS = 5.0f;
 
 boid::boid(const glm::vec3 startPos, enum tribes tribe):
   position(startPos),
@@ -11,8 +12,8 @@ boid::boid(const glm::vec3 startPos, enum tribes tribe):
 void boid::step(const float timestep){
   const float acceleration_decay = -0.1f;
   if(!atGoal()){
-    this->position += this->velocity*timestep;
     this->velocity += this->acceleration*timestep;
+    this->position += this->velocity*timestep;
 
     /* decay acceleration */
     if(this->acceleration.x > 0){
@@ -45,6 +46,14 @@ bool boid::atGoal(){
 
 glm::vec3 boid::getPosition(){
   return this->position;
+}
+
+glm::vec3 boid::getVelocity(){
+  return this->velocity;
+}
+
+glm::vec3 boid::getDirection(){
+  return glm::normalize(this->velocity);
 }
 
 enum tribes boid::getTribe(){

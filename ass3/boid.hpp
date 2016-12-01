@@ -1,3 +1,6 @@
+#ifndef TRIBES_BOID_H
+#define TRIBES_BOID_H
+
 #include <glm/glm.hpp>
 
 enum tribes{
@@ -7,6 +10,8 @@ enum tribes{
 
 class boid{
 public:
+  /* detection radius around boid */
+  static const float FLOCK_RADIUS;
 
   /* constructor, argument is starting position and member tribe */
   boid(const glm::vec3 startPos, enum tribes tribe);
@@ -26,6 +31,12 @@ public:
   /* return position */
   glm::vec3 getPosition();
 
+  /* return velocity */
+  glm::vec3 getVelocity();
+
+  /* return forward direction of boid */
+  glm::vec3 getDirection();
+
   /* return tribe */
   enum tribes getTribe();
 
@@ -40,3 +51,5 @@ private:
 
   bool atGoal();
 };
+
+#endif

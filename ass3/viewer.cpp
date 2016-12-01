@@ -20,6 +20,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #define _USE_MATH_DEFINES
 #include "Shaders.h"
+#include "helper.hpp"
 #include "VAO.hpp"
 #include "boid.hpp"
 
@@ -28,55 +29,119 @@ float eyex, eyey, eyez;
 double theta, phi;
 double r;
 
-GLuint shaderProgram;
+GLuint monkeyProgram;
+GLuint groundProgram;
 
 glm::mat4 projection;
 
-/* number of tribe members per tribe */
-#define NUM_TRIBE 5
+#define NUM_TRIBE 5 /* number of tribe members per tribe */
+#define GRID_LENGTH 33 /* number of grid sections */
+#define GRID_EMPTY -1
+#define GRID_OBSTACLE -2;
 
 std::vector<boid> boids;
 
 struct VAO monkey;
 struct VAO ground;
 
+int grid[GRID_LENGTH][GRID_LENGTH]; /* value in grid is indice of boid inside the grid */
+
+void printGrid();
+
+void initBoids();
+
 void updateBoids();
 
 void init() {
     /* prepare the ground */
     VAO_init(&ground);
-    ground.program = shaderProgram;
+    ground.program = groundProgram;
 
     /* Load the ground obj into the VAO */
     VAO_loadObj(&ground,"ground.obj");
 
     /* prepare the monkey model */
     VAO_init(&monkey);
-    monkey.program = shaderProgram;
+    monkey.program = monkeyProgram;
 
     /*  Load the monkey obj file into the VAO */
     VAO_loadObj(&monkey,"monkey.obj");
 
-    /* set up initial boid positions */
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_real_distribution<float> dis(-1,1);
-    const float base_height = 1.f;
-    const float side = 16.0f;
-    for(unsigned int i = 0; i < NUM_TRIBE;i++){
-      const float red_z = dis(gen) * side;
-      boid redBoid(glm::vec3(side,base_height,red_z),tribes::RED);
-      redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
-      redBoid.setGoal(-side);
-      boids.push_back(redBoid);
-
-
-      const float blue_z = dis(gen) * side;
-      boid blueBoid(glm::vec3(-side,base_height,blue_z),tribes::BLUE);
-      blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
-      blueBoid.setGoal(side);
-      boids.push_back(blueBoid);
+    /* initialize grid */
+    for(unsigned int i = 0; i < GRID_LENGTH; i++){
+      for(unsigned int j = 0; j < GRID_LENGTH;j++){
+        grid[i][j] = GRID_EMPTY; /* nothing in grid */
+      }
     }
+
+    /* put the ground based obstacles into the grid */
+    for(size_t i = 0; i < ground.num_vertices;i+=3){
+      float x = ground.vertices[i];
+      float y = ground.vertices[i+1];
+      float z = ground.vertices[i+2];
+      if(y > 0){
+        unsigned int x_ind = getGridCell(x,17);
+        unsigned int z_ind = getGridCell(z,17);
+        grid[x_ind-1][z_ind-1] = GRID_OBSTACLE;
+      }
+    }
+
+    initBoids();
+}
+
+void printGrid(){
+  for(unsigned int i = 0; i < GRID_LENGTH;i++){
+    for(unsigned int j = 0;j < GRID_LENGTH;j++){
+      printf("%2d ",grid[i][j]);
+    }
+    printf("\n");
+  }
+}
+
+void initBoids(){
+  /* set up initial boid positions */
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<float> dis(-1,1);
+  const float base_height = 1.f;
+  const float side = 16.0f;
+  for(unsigned int i = 0; i < NUM_TRIBE;i++){
+    unsigned int x_ind = 0;
+    unsigned int z_ind = 0;
+    float red_z;
+    /* get random points for red boid, only assign if not shared
+     * if there's already a boid in the grid slot, roll a new number */
+    do{
+      red_z = dis(gen) * side;
+      /* get grid point */
+      x_ind = getGridCell(side,17);
+      z_ind = getGridCell(red_z,17);
+    }while(grid[x_ind][z_ind] != GRID_EMPTY);
+    
+    /* set point in grid with this boid's index */
+    grid[x_ind][z_ind] = i*2;
+
+    boid redBoid(glm::vec3(side,base_height,red_z),tribes::RED);
+    redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
+    redBoid.setGoal(-side);
+    boids.push_back(redBoid);
+
+    /* same thing but on blue tribe side */
+    float blue_z;
+    do{
+      blue_z = dis(gen) * side;
+      /* set grid point */
+      x_ind = getGridCell(-side,17);
+      z_ind = getGridCell(blue_z,17);
+    }while(grid[x_ind][z_ind] != GRID_EMPTY);
+
+    grid[x_ind][z_ind] = i*2 + 1;
+
+    boid blueBoid(glm::vec3(-side,base_height,blue_z),tribes::BLUE);
+    blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
+    blueBoid.setGoal(side);
+    boids.push_back(blueBoid);
+  }
 }
 
 void changeSize(int w, int h) {
@@ -233,11 +298,13 @@ int main(int argc, char **argv) {
     glClearColor(1.0, 1.0, 1.0, 1.0);
 
     vs = buildShader(GL_VERTEX_SHADER, "general.vs");
-    fs = buildShader(GL_FRAGMENT_SHADER, "general.fs");
-    shaderProgram = buildProgram(vs, fs, 0);
-    dumpProgram(shaderProgram, "general shader");
+    fs = buildShader(GL_FRAGMENT_SHADER, "ground.fs");
+    groundProgram = buildProgram(vs, fs, 0);
+    dumpProgram(groundProgram, "ground shader");
 
-    init();
+    fs = buildShader(GL_FRAGMENT_SHADER,"monkey.fs");
+    monkeyProgram = buildProgram(vs,fs,0);
+    dumpProgram(monkeyProgram,"ground shader");
 
     theta = 1.5;
     phi = 1.5;
@@ -247,5 +314,6 @@ int main(int argc, char **argv) {
     eyey = r*sin(theta)*sin(phi);
     eyez = r*cos(theta);
 
+    init();
     glutMainLoop();
 }

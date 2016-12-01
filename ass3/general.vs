@@ -2,7 +2,7 @@
  *  Simple vertex shader for lab 4
  */
 
-#version 430 core
+#version 330 core
 
 uniform mat4 modelView;
 uniform mat4 projection;
