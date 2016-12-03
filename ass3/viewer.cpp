@@ -127,7 +127,8 @@ void initBoids(){
 
     boid redBoid(glm::vec3(side,base_height,red_z),tribes::RED);
     redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
-    redBoid.setGoal(-side);
+    redBoid.setGoal(-side + 1);
+    redBoid.setBounds(-side,-side,side,side);
     boids.push_back(redBoid);
 
     /* same thing but on blue tribe side */
@@ -143,7 +144,8 @@ void initBoids(){
 
     boid blueBoid(glm::vec3(-side,base_height,blue_z),tribes::BLUE);
     blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
-    blueBoid.setGoal(side);
+    blueBoid.setGoal(side - 1);
+    blueBoid.setBounds(-side,-side,side,side);
     boids.push_back(blueBoid);
   }
 }
@@ -271,23 +273,43 @@ void updateBoids(){
       for(unsigned int k = startz; k < endz;k++){
         const unsigned int index = grid[j][k];
         if(index != GRID_EMPTY && index != GRID_OBSTACLE){
+          /* when the tribe is the same, get averages */
           if(boids[index].getTribe() == boids[i].getTribe()){
             average_velocity += boids[index].getVelocity();
             centroid += boids[index].getPosition();
             count++;
+            /* compute avoidance with flock */
           }
+          /* when tribe is different, compute avoidance */
+          else{
+
+          }
+        }
+        /* avoid obstacles */
+        else if(index == GRID_OBSTACLE){
+
         }
       }
     }
 
     average_velocity /= count;
     centroid /= count;
-    /*const float currmag = glm::length(boids[i].getVelocity());
+    const glm::vec3 direction(glm::normalize(centroid - boids[i].getPosition()));
+    const float currmag = glm::length(boids[i].getVelocity());
     const float avgmag = glm::length(average_velocity);
-    if(currmag > avgmag){
 
+    /* keep boid at velocity of flock mates
+    if(currmag > avgmag){
+    }else if (currmag < avgmag){
+      boids[i].addAcceleration(average_velocity);
     }*/
-    boids[i].step(0.05f);
+    /* keep boid moving in direction of goal */
+    if(currmag < 1.0f){
+      boids[i].addAcceleration(glm::vec3(boids[i].goalDirection(),0.0f,0.0f));
+    }
+    /* keep boid within it's flock */
+    boids[i].addAcceleration(direction);
+    boids[i].step(0.033f);
 
     /* new grid spots */
     const unsigned int nx = getGridCell(boids[i].getPosition().x,GRID_OFFSET);

@@ -13,6 +13,8 @@ public:
   /* detection radius around boid */
   static const float FLOCK_RADIUS;
 
+  static const float MAX_ACCELERATION;
+
   /* constructor, argument is starting position and member tribe */
   boid(const glm::vec3 startPos, enum tribes tribe);
 
@@ -28,6 +30,10 @@ public:
   /* set the x coordinate that the boid has to reach */
   void setGoal(const float goal);
 
+  /* set the bounds that the boid should not cross over */
+  void setBounds(const float x1, const float y1,
+    const float x2, const float y2);
+
   /* return position */
   glm::vec3 getPosition();
 
@@ -36,6 +42,9 @@ public:
 
   /* return forward direction of boid */
   glm::vec3 getDirection();
+
+  /* return goal direction */
+  float goalDirection();
 
   /* return tribe */
   enum tribes getTribe();
@@ -46,6 +55,8 @@ private:
   glm::vec3 acceleration;
 
   float goal;
+
+  float bounds[4];
 
   const enum tribes tribe;
 
