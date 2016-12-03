@@ -279,6 +279,8 @@ void updateBoids(){
             centroid += boids[index].getPosition();
             count++;
             /* compute avoidance with flock */
+            const glm::vec3 currDirect = boids[i].getDirection();
+            const glm::vec3 otherDirect = boids[i].getDirection();
           }
           /* when tribe is different, compute avoidance */
           else{
@@ -294,21 +296,27 @@ void updateBoids(){
 
     average_velocity /= count;
     centroid /= count;
-    const glm::vec3 direction(glm::normalize(centroid - boids[i].getPosition()));
+    const glm::vec3 centre_direction(glm::normalize(centroid - boids[i].getPosition()));
     const float currmag = glm::length(boids[i].getVelocity());
     const float avgmag = glm::length(average_velocity);
 
-    /* keep boid at velocity of flock mates
-    if(currmag > avgmag){
-    }else if (currmag < avgmag){
-      boids[i].addAcceleration(average_velocity);
-    }*/
     /* keep boid moving in direction of goal */
     if(currmag < 1.0f){
       boids[i].addAcceleration(glm::vec3(boids[i].goalDirection(),0.0f,0.0f));
     }
+
+    /* keep boid at velocity of flock mates */
+    if(currmag > avgmag){
+      /* acceleration in reverse */
+      boids[i].addAcceleration(-boids[i].getDirection());
+    }else if (currmag < avgmag){
+      /* acceleration forward */
+      boids[i].addAcceleration(boids[i].getDirection());
+    }
+
     /* keep boid within it's flock */
-    boids[i].addAcceleration(direction);
+    boids[i].addAcceleration(centre_direction);
+
     boids[i].step(0.033f);
 
     /* new grid spots */

@@ -1,7 +1,8 @@
 #include "boid.hpp"
+#include <cstdio>
 
 const float boid::FLOCK_RADIUS = 5.0f;
-const float boid::MAX_ACCELERATION = 5.0f;
+const float boid::MAX_ACCELERATION = 25.0f;
 
 boid::boid(const glm::vec3 startPos, enum tribes tribe):
   position(startPos),
@@ -11,7 +12,7 @@ boid::boid(const glm::vec3 startPos, enum tribes tribe):
   tribe(tribe){}
 
 void boid::step(const float timestep){
-  const float acceleration_decay = 0.3f;
+  const float acceleration_decay = 0.2f;
   if(!atGoal()){
     this->velocity += this->acceleration*timestep;
     this->position += this->velocity*timestep;
@@ -28,9 +29,7 @@ void boid::step(const float timestep){
       this->position.z = bounds[3];
 
     /* decay acceleration */
-    if(glm::length(this->acceleration) > 0){
-      this->acceleration *= acceleration_decay*timestep;
-    }else if(glm::length(this->acceleration) < 0){
+    if(glm::length(this->acceleration) != 0){
       this->acceleration *= acceleration_decay*timestep;
     }
   }
@@ -38,8 +37,13 @@ void boid::step(const float timestep){
 
 void boid::addAcceleration(const glm::vec3 accel){
   const glm::vec3 newAccel(this->acceleration+accel);
-  if(glm::length(newAccel) < boid::MAX_ACCELERATION)
+  const float mag = glm::length(newAccel);
+  if(mag < boid::MAX_ACCELERATION){
     this->acceleration = newAccel;
+  }else if (!glm::isinf(mag) && !glm::isnan(mag)){
+    /* cap the acceleration */
+    this->acceleration = glm::normalize(newAccel)*boid::MAX_ACCELERATION;
+  }
 }
 
 void boid::setAcceleration(const glm::vec3 accel){
