@@ -35,9 +35,10 @@ GLuint groundProgram;
 glm::mat4 projection;
 
 #define NUM_TRIBE 5 /* number of tribe members per tribe */
-#define GRID_LENGTH 33 /* number of grid sections */
+#define GRID_LENGTH 34 /* number of grid sections */
 #define GRID_EMPTY -1
-#define GRID_OBSTACLE -2;
+#define GRID_OBSTACLE -2
+#define GRID_OFFSET 18
 
 std::vector<boid> boids;
 
@@ -80,8 +81,8 @@ void init() {
       float y = ground.vertices[i+1];
       float z = ground.vertices[i+2];
       if(y > 0){
-        unsigned int x_ind = getGridCell(x,17);
-        unsigned int z_ind = getGridCell(z,17);
+        unsigned int x_ind = getGridCell(x,GRID_OFFSET);
+        unsigned int z_ind = getGridCell(z,GRID_OFFSET);
         grid[x_ind-1][z_ind-1] = GRID_OBSTACLE;
       }
     }
@@ -92,7 +93,10 @@ void init() {
 void printGrid(){
   for(unsigned int i = 0; i < GRID_LENGTH;i++){
     for(unsigned int j = 0;j < GRID_LENGTH;j++){
-      printf("%2d ",grid[i][j]);
+      if(grid[i][j] != GRID_EMPTY)
+        printf("%2d ",grid[i][j]);
+      else
+        printf("   ");
     }
     printf("\n");
   }
@@ -114,10 +118,10 @@ void initBoids(){
     do{
       red_z = dis(gen) * side;
       /* get grid point */
-      x_ind = getGridCell(side,17);
-      z_ind = getGridCell(red_z,17);
+      x_ind = getGridCell(side,GRID_OFFSET);
+      z_ind = getGridCell(red_z,GRID_OFFSET);
     }while(grid[x_ind][z_ind] != GRID_EMPTY);
-    
+
     /* set point in grid with this boid's index */
     grid[x_ind][z_ind] = i*2;
 
@@ -131,8 +135,8 @@ void initBoids(){
     do{
       blue_z = dis(gen) * side;
       /* set grid point */
-      x_ind = getGridCell(-side,17);
-      z_ind = getGridCell(blue_z,17);
+      x_ind = getGridCell(-side,GRID_OFFSET);
+      z_ind = getGridCell(blue_z,GRID_OFFSET);
     }while(grid[x_ind][z_ind] != GRID_EMPTY);
 
     grid[x_ind][z_ind] = i*2 + 1;
@@ -235,8 +239,61 @@ void idleFunc(void){
 }
 
 void updateBoids(){
+  /* search range among the grid cells */
+  const unsigned int search_range = abs(floor(boid::FLOCK_RADIUS));
+
   for(unsigned int i = 0; i < boids.size();i++){
-    boids[i].step(0.1f);
+    /* original grid spots */
+    const unsigned int ox = getGridCell(boids[i].getPosition().x,GRID_OFFSET);
+    const unsigned int oz = getGridCell(boids[i].getPosition().z,GRID_OFFSET);
+
+    /* get area around the boid */
+    const unsigned int startx =
+      (ox >= search_range) ? (ox - search_range) : 0;
+
+    const unsigned int startz =
+      (oz >= search_range) ? (oz - search_range) : 0;
+
+    const unsigned int endx =
+      ((GRID_LENGTH - ox) > search_range) ? (ox + search_range) : GRID_LENGTH;
+
+    const unsigned int endz =
+      ((GRID_LENGTH - oz) > search_range) ? (oz + search_range) : GRID_LENGTH;
+
+
+    /* get average of nearby flock mates velocity
+     * and compute a centroid
+     */
+    unsigned int count = 0;
+    glm::vec3 average_velocity(0.0f,0.0f,0.0f);
+    glm::vec3 centroid(0.0f,0.0f,0.0f);
+    for(unsigned int j = startx ;j < endx;j++){
+      for(unsigned int k = startz; k < endz;k++){
+        const unsigned int index = grid[j][k];
+        if(index != GRID_EMPTY && index != GRID_OBSTACLE){
+          if(boids[index].getTribe() == boids[i].getTribe()){
+            average_velocity += boids[index].getVelocity();
+            centroid += boids[index].getPosition();
+            count++;
+          }
+        }
+      }
+    }
+
+    average_velocity /= count;
+    centroid /= count;
+    /*const float currmag = glm::length(boids[i].getVelocity());
+    const float avgmag = glm::length(average_velocity);
+    if(currmag > avgmag){
+
+    }*/
+    boids[i].step(0.05f);
+
+    /* new grid spots */
+    const unsigned int nx = getGridCell(boids[i].getPosition().x,GRID_OFFSET);
+    const unsigned int nz = getGridCell(boids[i].getPosition().z,GRID_OFFSET);
+    grid[ox][oz] = GRID_EMPTY;
+    grid[nx][nz] = i;
   }
 }
 
