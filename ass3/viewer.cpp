@@ -278,9 +278,18 @@ void updateBoids(){
             average_velocity += boids[index].getVelocity();
             centroid += boids[index].getPosition();
             count++;
-            /* compute avoidance with flock */
+
+            /* compute avoidance with flock using dot product */
             const glm::vec3 currDirect = boids[i].getDirection();
             const glm::vec3 otherDirect = boids[i].getDirection();
+            const float cosine = glm::dot(currDirect,otherDirect);
+            /* if cosine < 1, vectors intersect at some point
+             * push intersection into future by increasing angle between
+             * the boids
+             */
+             if(cosine < 1){
+               
+             }
           }
           /* when tribe is different, compute avoidance */
           else{
