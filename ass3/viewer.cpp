@@ -282,14 +282,18 @@ void updateBoids(){
             /* compute avoidance with flock using dot product */
             const glm::vec3 currDirect = boids[i].getDirection();
             const glm::vec3 otherDirect = boids[i].getDirection();
+            const float dist = glm::distance(boids[index].getPosition(),boids[i].getPosition());
             const float cosine = glm::dot(currDirect,otherDirect);
-            /* if cosine < 1, vectors intersect at some point
-             * push intersection into future by increasing angle between
-             * the boids
-             */
-             if(cosine < 1){
-               
-             }
+
+            /* if cosine < 1 vectors intersect at some point
+            * push intersection into future by increasing angle between
+            * the boids. Also do the same if boids are too close
+            */
+            if((cosine < 1 || dist < 3.0f) && index != i ){
+              const float weight = 1.0f/(dist*dist);
+              const glm::vec3 awayDirection(boids[i].getPosition() - boids[index].getPosition());
+              boids[i].addAcceleration(awayDirection*weight);
+            }
           }
           /* when tribe is different, compute avoidance */
           else{
