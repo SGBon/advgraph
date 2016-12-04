@@ -31,7 +31,7 @@ public:
   void setGoal(const glm::vec3 goal);
 
   /* set the bounds that the boid should not cross over */
-  void setBounds(const float x1, const float y1,
+  static void setBounds(const float x1, const float y1,
     const float x2, const float y2);
 
   /* return position */
@@ -58,7 +58,7 @@ private:
 
   glm::vec3 goal;
 
-  float bounds[4];
+  static float bounds[4];
 
   enum tribes tribe;
 

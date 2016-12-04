@@ -6,6 +6,8 @@
 const float boid::FLOCK_RADIUS = 10.0f;
 const float boid::MAX_ACCELERATION = 5.0f;
 
+float boid::bounds[4] = {0.0f,0.0f,0.0f,0.0f};
+
 boid::boid(const glm::vec3 startPos, enum tribes tribe):
   position(startPos),
   velocity(glm::vec3(0.0f,0.0f,0.0f)),
@@ -70,10 +72,12 @@ void boid::setGoal(const glm::vec3 goal){
 }
 
 void boid::setBounds(const float x1, const float y1, const float x2, const float y2){
-      this->bounds[0] = x1;
-      this->bounds[1] = y1;
-      this->bounds[2] = x2;
-      this->bounds[3] = y2;
+  if(boid::bounds[0] == 0.0f){
+      bounds[0] = x1;
+      bounds[1] = y1;
+      bounds[2] = x2;
+      bounds[3] = y2;
+    }
   }
 
 bool boid::atGoal(){
