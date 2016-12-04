@@ -34,7 +34,7 @@ GLuint groundProgram;
 
 glm::mat4 projection;
 
-#define NUM_TRIBE 16 /* number of tribe members per tribe */
+#define NUM_TRIBE 4 /* number of tribe members per tribe */
 #define GRID_LENGTH 34 /* number of grid sections */
 #define GRID_EMPTY -1
 #define GRID_OBSTACLE -2

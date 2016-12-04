@@ -1,7 +1,7 @@
 #include "boid.hpp"
 #include <cstdio>
 
-#define FLIPPING
+//#define FLIPPING
 
 const float boid::FLOCK_RADIUS = 10.0f;
 const float boid::MAX_ACCELERATION = 5.0f;
