@@ -50,7 +50,7 @@ void boid::setAcceleration(const glm::vec3 accel){
   this->acceleration = accel;
 }
 
-void boid::setGoal(const float goal){
+void boid::setGoal(const glm::vec3 goal){
   this->goal = goal;
 }
 
@@ -62,11 +62,8 @@ void boid::setBounds(const float x1, const float y1, const float x2, const float
   }
 
 bool boid::atGoal(){
-  if(this->tribe == RED){
-    return position.x < goal;
-  }else{
-    return position.x > goal;
-  }
+  const float GOAL_RADIUS = 1.0f;
+  return glm::distance(this->position,this->goal) < GOAL_RADIUS;
 }
 
 glm::vec3 boid::getPosition(){
@@ -81,8 +78,9 @@ glm::vec3 boid::getDirection(){
   return glm::normalize(this->velocity);
 }
 
-float boid::goalDirection(){
-  return abs(goal)/goal;
+glm::vec3 boid::goalDirection(){
+  const glm::vec3 direction = glm::normalize(this->goal - this->position);
+  return glm::vec3(direction.x,0,direction.z);
 }
 
 enum tribes boid::getTribe(){

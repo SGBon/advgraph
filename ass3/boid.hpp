@@ -28,7 +28,7 @@ public:
   void setAcceleration(const glm::vec3 acceleration);
 
   /* set the x coordinate that the boid has to reach */
-  void setGoal(const float goal);
+  void setGoal(const glm::vec3 goal);
 
   /* set the bounds that the boid should not cross over */
   void setBounds(const float x1, const float y1,
@@ -44,7 +44,7 @@ public:
   glm::vec3 getDirection();
 
   /* return goal direction */
-  float goalDirection();
+  glm::vec3 goalDirection();
 
   /* return tribe */
   enum tribes getTribe();
@@ -54,7 +54,7 @@ private:
   glm::vec3 velocity;
   glm::vec3 acceleration;
 
-  float goal;
+  glm::vec3 goal;
 
   float bounds[4];
 

@@ -34,7 +34,7 @@ GLuint groundProgram;
 
 glm::mat4 projection;
 
-#define NUM_TRIBE 5 /* number of tribe members per tribe */
+#define NUM_TRIBE 8 /* number of tribe members per tribe */
 #define GRID_LENGTH 34 /* number of grid sections */
 #define GRID_EMPTY -1
 #define GRID_OBSTACLE -2
@@ -127,7 +127,7 @@ void initBoids(){
 
     boid redBoid(glm::vec3(side,base_height,red_z),tribes::RED);
     redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
-    redBoid.setGoal(-side + 1);
+    redBoid.setGoal(glm::vec3(-side+1,0.0f,0.0f));
     redBoid.setBounds(-side,-side,side,side);
     boids.push_back(redBoid);
 
@@ -144,7 +144,7 @@ void initBoids(){
 
     boid blueBoid(glm::vec3(-side,base_height,blue_z),tribes::BLUE);
     blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
-    blueBoid.setGoal(side - 1);
+    blueBoid.setGoal(glm::vec3(side+1,0.0f,0.0f));
     blueBoid.setBounds(-side,-side,side,side);
     boids.push_back(blueBoid);
   }
@@ -279,30 +279,32 @@ void updateBoids(){
             centroid += boids[index].getPosition();
             count++;
 
-            /* compute avoidance with flock using dot product */
-            const glm::vec3 currDirect = boids[i].getDirection();
-            const glm::vec3 otherDirect = boids[i].getDirection();
-            const float dist = glm::distance(boids[index].getPosition(),boids[i].getPosition());
-            const float cosine = glm::dot(currDirect,otherDirect);
-
-            /* if cosine < 1 vectors intersect at some point
-            * push intersection into future by increasing angle between
-            * the boids. Also do the same if boids are too close
-            */
-            if((cosine < 1 || dist < 3.0f) && index != i ){
-              const float weight = 1.0f/(dist*dist);
-              const glm::vec3 awayDirection(boids[i].getPosition() - boids[index].getPosition());
-              boids[i].addAcceleration(awayDirection*weight);
-            }
           }
+          /* compute boid-boid avoidance using dot product */
+          const glm::vec3 currDirect = boids[i].getDirection();
+          const glm::vec3 otherDirect = boids[i].getDirection();
+          const float dist = glm::distance(boids[index].getPosition(),boids[i].getPosition());
+          const float cosine = abs(glm::dot(currDirect,otherDirect));
+
+          /* if cosine < 1 vectors intersect at some point
+          * push intersection into future by increasing angle between
+          * the boids. Also do the same if boids are too close
+          */
+          if((cosine < 1 || dist < 3.0f) && index != i ){
+            const float weight = 1.0f/(dist*dist);
+            const glm::vec3 awayDirection(
+              glm::normalize(
+                boids[i].getPosition() - boids[index].getPosition()));
+                boids[i].addAcceleration(awayDirection*weight*3.0f);
+              }
+
           /* when tribe is different, compute avoidance */
+          /*
           else{
-
-          }
+          }*/
         }
         /* avoid obstacles */
         else if(index == GRID_OBSTACLE){
-
         }
       }
     }
@@ -314,8 +316,8 @@ void updateBoids(){
     const float avgmag = glm::length(average_velocity);
 
     /* keep boid moving in direction of goal */
-    if(currmag < 1.0f){
-      boids[i].addAcceleration(glm::vec3(boids[i].goalDirection(),0.0f,0.0f));
+    if(abs(boids[i].getVelocity().x) < 1.0f){
+      boids[i].addAcceleration(boids[i].goalDirection());
     }
 
     /* keep boid at velocity of flock mates */
