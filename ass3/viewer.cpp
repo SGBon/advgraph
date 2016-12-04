@@ -127,7 +127,6 @@ void initBoids(){
     grid[x_ind][z_ind] = i*2;
 
     boid redBoid(glm::vec3(side,BOID_Y_OFFSET,red_z),tribes::RED);
-    redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
     redBoid.setGoal(glm::vec3(-side+1,0.0f,0.0f));
     boids.push_back(redBoid);
 
@@ -143,7 +142,6 @@ void initBoids(){
     grid[x_ind][z_ind] = i*2 + 1;
 
     boid blueBoid(glm::vec3(-side,BOID_Y_OFFSET,blue_z),tribes::BLUE);
-    blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
     blueBoid.setGoal(glm::vec3(side+1,0.0f,0.0f));
     boids.push_back(blueBoid);
   }
