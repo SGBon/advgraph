@@ -277,11 +277,11 @@ void updateBoids(){
           const glm::vec3 obs_pos(rx,BOID_Y_OFFSET,rz);
           const float dist = glm::distance(obs_pos,boids[i].getPosition());
           /* determine if object is in path of boid */
-          if(infront(boids[i],obs_pos,10.0f) || dist  < monkey.radius){
+          if(infront(boids[i],obs_pos,10.0f) || dist  < (monkey.radius+1.0f)){
             glm::vec3 obs_dir(boids[i].getDirection() -
-              glm::normalize(boids[i].getPosition()-obs_pos));
+              glm::normalize(obs_pos-boids[i].getPosition()));
             obs_dir.x = 0;
-            boids[i].addAcceleration(glm::normalize(obs_dir)*0.1f);
+            boids[i].addAcceleration(glm::normalize(obs_dir)*0.3f);
           }
         }
       }
