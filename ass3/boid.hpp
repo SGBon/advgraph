@@ -35,19 +35,19 @@ public:
     const float x2, const float y2);
 
   /* return position */
-  glm::vec3 getPosition();
+  glm::vec3 getPosition() const;
 
   /* return velocity */
-  glm::vec3 getVelocity();
+  glm::vec3 getVelocity() const;
 
   /* return forward direction of boid */
-  glm::vec3 getDirection();
+  glm::vec3 getDirection() const;
 
   /* return goal direction */
-  glm::vec3 goalDirection();
+  glm::vec3 goalDirection() const;
 
   /* return tribe */
-  enum tribes getTribe();
+  enum tribes getTribe() const;
 
   void flipGoal();
 

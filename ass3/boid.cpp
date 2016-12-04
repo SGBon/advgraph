@@ -2,7 +2,7 @@
 #include <cstdio>
 
 const float boid::FLOCK_RADIUS = 5.0f;
-const float boid::MAX_ACCELERATION = 25.0f;
+const float boid::MAX_ACCELERATION = 5.0f;
 
 boid::boid(const glm::vec3 startPos, enum tribes tribe):
   position(startPos),
@@ -33,7 +33,7 @@ void boid::step(const float timestep){
       this->acceleration *= acceleration_decay*timestep;
     }
   }else{
-    //flipGoal();
+    flipGoal();
   }
 }
 
@@ -64,28 +64,28 @@ void boid::setBounds(const float x1, const float y1, const float x2, const float
   }
 
 bool boid::atGoal(){
-  const float GOAL_RADIUS = 1.0f;
+  const float GOAL_RADIUS = 3.0f;
   return glm::distance(this->position,this->goal) < GOAL_RADIUS;
 }
 
-glm::vec3 boid::getPosition(){
+glm::vec3 boid::getPosition() const{
   return this->position;
 }
 
-glm::vec3 boid::getVelocity(){
+glm::vec3 boid::getVelocity() const{
   return this->velocity;
 }
 
-glm::vec3 boid::getDirection(){
+glm::vec3 boid::getDirection() const{
   return glm::normalize(this->velocity);
 }
 
-glm::vec3 boid::goalDirection(){
+glm::vec3 boid::goalDirection() const{
   const glm::vec3 direction = glm::normalize(this->goal - this->position);
   return glm::vec3(direction.x,0,direction.z);
 }
 
-enum tribes boid::getTribe(){
+enum tribes boid::getTribe() const {
   return this->tribe;
 }
 

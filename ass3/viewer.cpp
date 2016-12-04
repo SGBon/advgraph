@@ -34,7 +34,7 @@ GLuint groundProgram;
 
 glm::mat4 projection;
 
-#define NUM_TRIBE 8 /* number of tribe members per tribe */
+#define NUM_TRIBE 3 /* number of tribe members per tribe */
 #define GRID_LENGTH 34 /* number of grid sections */
 #define GRID_EMPTY -1
 #define GRID_OBSTACLE -2
@@ -78,12 +78,12 @@ void init() {
 
     /* put the ground based obstacles into the grid */
     for(size_t i = 0; i < ground.num_vertices;i+=3){
-      float x = ground.vertices[i];
-      float y = ground.vertices[i+1];
-      float z = ground.vertices[i+2];
+      const float x = ground.vertices[i];
+      const float y = ground.vertices[i+1];
+      const float z = ground.vertices[i+2];
       if(y > 0){
-        unsigned int x_ind = getGridCell(x,GRID_OFFSET);
-        unsigned int z_ind = getGridCell(z,GRID_OFFSET);
+        const unsigned int x_ind = getGridCell(x,GRID_OFFSET);
+        const unsigned int z_ind = getGridCell(z,GRID_OFFSET);
         grid[x_ind-1][z_ind-1] = GRID_OBSTACLE;
       }
     }
@@ -186,7 +186,10 @@ void displayFunc(void) {
     for(size_t i = 0; i < boids.size();i++){
       glUseProgram(mprog);
 
-      const glm::mat4 model = view*glm::translate(glm::mat4(1.0),boids[i].getPosition());
+      const glm::mat4 model = view*glm::translate(glm::mat4(1.0),boids[i].getPosition())
+      * glm::rotate(glm::mat4(1.0f),
+      (float)acos(glm::dot(boids[i].getDirection(),glm::vec3(0.0f,0.0f,1.0f))),
+        glm::vec3(0.0f,1.0f,0.0f));
 
       viewLoc = glGetUniformLocation(mprog, "modelView");
       glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(model));
@@ -198,6 +201,7 @@ void displayFunc(void) {
       glUniform3f(eyeLoc,eyex,eyey,eyez);
 
       colourLoc = glGetUniformLocation(mprog,"base");
+      /* set colour based on tribe membership */
       switch(boids[i].getTribe()){
         case tribes::RED:
           glUniform4fv(colourLoc,1,glm::value_ptr(red));
@@ -263,6 +267,26 @@ void updateBoids(){
       ((GRID_LENGTH - oz) > search_range) ? (oz + search_range) : GRID_LENGTH;
 
 
+    /* avoid obstacles */
+    for(unsigned int j = startx; j < endx;j++){
+      for(unsigned int k = startz;k<endz;k++){
+        const unsigned int index = grid[j][k];
+        if(index == GRID_OBSTACLE){
+          const float rx = getReverseGrid(j,GRID_OFFSET);
+          const float rz = getReverseGrid(k,GRID_OFFSET);
+          const glm::vec3 obs_pos(rx,BOID_Y_OFFSET,rz);
+          const float dist = glm::distance(obs_pos,boids[i].getPosition());
+          /* determine if object is in path of boid */
+          if(infront(boids[i],obs_pos,10.0f) || dist  < monkey.radius){
+            glm::vec3 obs_dir(boids[i].getDirection() -
+              glm::normalize(boids[i].getPosition()-obs_pos));
+            obs_dir.x = 0;
+            boids[i].addAcceleration(glm::normalize(obs_dir)*0.1f);
+          }
+        }
+      }
+    }
+
     /* get average of nearby flock mates velocity
      * and compute a centroid
      */
@@ -300,10 +324,6 @@ void updateBoids(){
                 boids[i].addAcceleration(awayDirection*weight*monkey.radius);
           }
         }
-        /* avoid obstacles */
-        else if(index == GRID_OBSTACLE){
-          const glm::vec3 obs_pos(j,BOID_Y_OFFSET,k);
-        }
       }
     }
 
@@ -328,7 +348,7 @@ void updateBoids(){
     }
 
     /* keep boid within it's flock */
-    boids[i].addAcceleration(centre_direction);
+    boids[i].addAcceleration(centre_direction*0.5f);
 
     boids[i].step(0.033f);
 
@@ -336,7 +356,8 @@ void updateBoids(){
     const unsigned int nx = getGridCell(boids[i].getPosition().x,GRID_OFFSET);
     const unsigned int nz = getGridCell(boids[i].getPosition().z,GRID_OFFSET);
     grid[ox][oz] = GRID_EMPTY;
-    grid[nx][nz] = i;
+    if(grid[nx][nz] != GRID_OBSTACLE)
+      grid[nx][nz] = i;
   }
 }
 
