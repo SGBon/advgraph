@@ -1,6 +1,6 @@
 CXX=g++
-CFLAGS=-c -Wall -Wextra -g3 -std=c++11 -Wno-write-strings
-LIBS=-lGL -lglut -lGLU -lGLEW -lm -lfreeimage
+CFLAGS=-c -Wall -Wextra -O2 -std=c++11 -Wno-write-strings
+LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
 SOURCES=viewer.cpp Shaders.cpp tiny_obj_loader.cpp VAO.cpp boid.cpp helper.cpp
 OBJECTS=$(SOURCES:.cpp=.o)

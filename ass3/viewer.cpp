@@ -172,7 +172,6 @@ void displayFunc(void) {
     const GLuint mprog = monkey.program;
     const glm::vec4 red(1.0f,0.0f,0.0f,1.0f);
     const glm::vec4 blue(0.0f,0.0f,1.0f,1.0f);
-    const glm::vec4 brown(0.3f,0.3f,0.1f,1.0f);
 
     const glm::mat4 view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
         glm::vec3(0.0f, 0.0f, 0.0f),
@@ -225,9 +224,6 @@ void displayFunc(void) {
 
     eyeLoc = glGetUniformLocation(gprog,"Eye");
     glUniform3f(eyeLoc,eyex,eyey,eyez);
-
-    colourLoc = glGetUniformLocation(gprog, "base");
-    glUniform4fv(colourLoc,1,glm::value_ptr(brown));
 
     glBindVertexArray(ground.id);
     glDrawElements(GL_TRIANGLES, ground.num_indices, GL_UNSIGNED_INT, NULL);
