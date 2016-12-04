@@ -49,6 +49,8 @@ public:
   /* return tribe */
   enum tribes getTribe();
 
+  void flipGoal();
+
 private:
   glm::vec3 position;
   glm::vec3 velocity;
@@ -58,7 +60,7 @@ private:
 
   float bounds[4];
 
-  const enum tribes tribe;
+  enum tribes tribe;
 
   bool atGoal();
 };

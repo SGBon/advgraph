@@ -32,6 +32,8 @@ void boid::step(const float timestep){
     if(glm::length(this->acceleration) != 0){
       this->acceleration *= acceleration_decay*timestep;
     }
+  }else{
+    //flipGoal();
   }
 }
 
@@ -85,4 +87,9 @@ glm::vec3 boid::goalDirection(){
 
 enum tribes boid::getTribe(){
   return this->tribe;
+}
+
+void boid::flipGoal(){
+  this->goal = -this->goal;
+  this->tribe = tribe == RED ? BLUE : RED;
 }

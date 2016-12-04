@@ -1,3 +1,6 @@
+#ifndef VAO_HPP
+#define VAO_HPP
+
 /* a struct for VAOs */
 
 #include <GL/glew.h>
@@ -25,6 +28,8 @@ struct VAO{
   GLuint vbuffer;
   GLuint ibuffer;
 
+  float radius;
+
   /* texture/buffer state */
   enum vao_state{
     undefined, /* memory not yet allocated */
@@ -40,3 +45,4 @@ void VAO_loadObj(struct VAO *vao, char *filename);
 
 /* release memory allocated to the VAO */
 void VAO_destroy(struct VAO *vao);
+#endif

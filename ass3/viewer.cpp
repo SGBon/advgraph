@@ -39,6 +39,7 @@ glm::mat4 projection;
 #define GRID_EMPTY -1
 #define GRID_OBSTACLE -2
 #define GRID_OFFSET 18
+#define BOID_Y_OFFSET 1.0f
 
 std::vector<boid> boids;
 
@@ -107,7 +108,6 @@ void initBoids(){
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dis(-1,1);
-  const float base_height = 1.f;
   const float side = 16.0f;
   for(unsigned int i = 0; i < NUM_TRIBE;i++){
     unsigned int x_ind = 0;
@@ -125,7 +125,7 @@ void initBoids(){
     /* set point in grid with this boid's index */
     grid[x_ind][z_ind] = i*2;
 
-    boid redBoid(glm::vec3(side,base_height,red_z),tribes::RED);
+    boid redBoid(glm::vec3(side,BOID_Y_OFFSET,red_z),tribes::RED);
     redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
     redBoid.setGoal(glm::vec3(-side+1,0.0f,0.0f));
     redBoid.setBounds(-side,-side,side,side);
@@ -142,7 +142,7 @@ void initBoids(){
 
     grid[x_ind][z_ind] = i*2 + 1;
 
-    boid blueBoid(glm::vec3(-side,base_height,blue_z),tribes::BLUE);
+    boid blueBoid(glm::vec3(-side,BOID_Y_OFFSET,blue_z),tribes::BLUE);
     blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
     blueBoid.setGoal(glm::vec3(side+1,0.0f,0.0f));
     blueBoid.setBounds(-side,-side,side,side);
@@ -273,13 +273,15 @@ void updateBoids(){
       for(unsigned int k = startz; k < endz;k++){
         const unsigned int index = grid[j][k];
         if(index != GRID_EMPTY && index != GRID_OBSTACLE){
-          /* when the tribe is the same, get averages */
+          /* when the tribe is the same, get averages
+          * for velocity and centroid matching
+          */
           if(boids[index].getTribe() == boids[i].getTribe()){
             average_velocity += boids[index].getVelocity();
             centroid += boids[index].getPosition();
             count++;
-
           }
+
           /* compute boid-boid avoidance using dot product */
           const glm::vec3 currDirect = boids[i].getDirection();
           const glm::vec3 otherDirect = boids[i].getDirection();
@@ -290,21 +292,17 @@ void updateBoids(){
           * push intersection into future by increasing angle between
           * the boids. Also do the same if boids are too close
           */
-          if((cosine < 1 || dist < 3.0f) && index != i ){
+          if((cosine < 1 || dist < monkey.radius) && index != i ){
             const float weight = 1.0f/(dist*dist);
             const glm::vec3 awayDirection(
               glm::normalize(
                 boids[i].getPosition() - boids[index].getPosition()));
-                boids[i].addAcceleration(awayDirection*weight*3.0f);
-              }
-
-          /* when tribe is different, compute avoidance */
-          /*
-          else{
-          }*/
+                boids[i].addAcceleration(awayDirection*weight*monkey.radius);
+          }
         }
         /* avoid obstacles */
         else if(index == GRID_OBSTACLE){
+          const glm::vec3 obs_pos(j,BOID_Y_OFFSET,k);
         }
       }
     }
@@ -358,10 +356,10 @@ void keyboardFunc(unsigned char key, int x, int y) {
         theta -= 0.1;
         break;
 		case 'q':
-			r -= 0.1;
+			r -= 0.5;
 			break;
 		case 'e':
-			r += 0.1;
+			r += 0.5;
 			break;
     }
 

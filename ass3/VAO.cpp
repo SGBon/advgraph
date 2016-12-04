@@ -1,9 +1,7 @@
 #include "VAO.hpp"
-#include "tiny_obj_loader.h"
 #include <cstdio>
-#define _USE_MATH_DEFINES
-#include <cmath>
-#include <cstring>
+#include <cfloat>
+#include "tiny_obj_loader.h"
 
 void VAO_init(struct VAO *vao){
   vao->b_state = VAO::undefined;;
@@ -23,12 +21,21 @@ void VAO_loadObj(struct VAO *vao, char *filename){
   glGenVertexArrays(1,&vao->id);
   glBindVertexArray(vao->id);
 
+  float max = FLT_MIN;
+  float min = FLT_MAX;
+
   /* get vertex coordinates, one dimensional array */
   vao->num_vertices = shapes[0].mesh.positions.size();
   vao->vertices = new GLfloat[vao->num_vertices];
   for(i = 0; i < vao->num_vertices;i++){
     vao->vertices[i] = shapes[0].mesh.positions[i];
+    if(vao->vertices[i] > max)
+      max = vao->vertices[i];
+    if(vao->vertices[i] < min)
+      min = vao->vertices[i];
   }
+
+  vao->radius = max - min;
 
   /* get vertex normals */
   vao->num_normals = shapes[0].mesh.normals.size();
