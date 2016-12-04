@@ -34,7 +34,7 @@ GLuint groundProgram;
 
 glm::mat4 projection;
 
-#define NUM_TRIBE 3 /* number of tribe members per tribe */
+#define NUM_TRIBE 5 /* number of tribe members per tribe */
 #define GRID_LENGTH 34 /* number of grid sections */
 #define GRID_EMPTY -1
 #define GRID_OBSTACLE -2
@@ -277,11 +277,12 @@ void updateBoids(){
           const glm::vec3 obs_pos(rx,BOID_Y_OFFSET,rz);
           const float dist = glm::distance(obs_pos,boids[i].getPosition());
           /* determine if object is in path of boid */
-          if(infront(boids[i],obs_pos,10.0f) || dist  < (monkey.radius+1.0f)){
+          if(infront(boids[i],obs_pos,3.0f) || dist  < (monkey.radius+1.0f)){
             glm::vec3 obs_dir(boids[i].getDirection() -
               glm::normalize(obs_pos-boids[i].getPosition()));
-            obs_dir.x = 0;
-            boids[i].addAcceleration(glm::normalize(obs_dir)*0.3f);
+            const float weight = 1.0f/glm::length(obs_dir);
+            /* smaller weight when distance is farther */
+            boids[i].addAcceleration(obs_dir*weight*0.1f);
           }
         }
       }
@@ -348,9 +349,9 @@ void updateBoids(){
     }
 
     /* keep boid within it's flock */
-    boids[i].addAcceleration(centre_direction*0.5f);
+    boids[i].addAcceleration(centre_direction);
 
-    boids[i].step(0.033f);
+    boids[i].step(0.016f);
 
     /* new grid spots */
     const unsigned int nx = getGridCell(boids[i].getPosition().x,GRID_OFFSET);

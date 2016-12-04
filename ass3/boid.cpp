@@ -33,7 +33,7 @@ void boid::step(const float timestep){
       this->acceleration *= acceleration_decay*timestep;
     }
   }else{
-    flipGoal();
+    //flipGoal();
   }
 }
 
