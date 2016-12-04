@@ -109,6 +109,7 @@ void initBoids(){
   std::mt19937 gen(rd());
   std::uniform_real_distribution<float> dis(-1,1);
   const float side = 16.0f;
+  boid::setBounds(-side,-side,side,side);
   for(unsigned int i = 0; i < NUM_TRIBE;i++){
     unsigned int x_ind = 0;
     unsigned int z_ind = 0;
@@ -128,7 +129,6 @@ void initBoids(){
     boid redBoid(glm::vec3(side,BOID_Y_OFFSET,red_z),tribes::RED);
     redBoid.setAcceleration(glm::vec3(-1.0f,0.0f,0.0f));
     redBoid.setGoal(glm::vec3(-side+1,0.0f,0.0f));
-    redBoid.setBounds(-side,-side,side,side);
     boids.push_back(redBoid);
 
     /* same thing but on blue tribe side */
@@ -145,7 +145,6 @@ void initBoids(){
     boid blueBoid(glm::vec3(-side,BOID_Y_OFFSET,blue_z),tribes::BLUE);
     blueBoid.setAcceleration(glm::vec3(1.0f,0.0f,0.0f));
     blueBoid.setGoal(glm::vec3(side+1,0.0f,0.0f));
-    blueBoid.setBounds(-side,-side,side,side);
     boids.push_back(blueBoid);
   }
 }
