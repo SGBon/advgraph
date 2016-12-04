@@ -34,7 +34,7 @@ GLuint groundProgram;
 
 glm::mat4 projection;
 
-#define NUM_TRIBE 5 /* number of tribe members per tribe */
+#define NUM_TRIBE 16 /* number of tribe members per tribe */
 #define GRID_LENGTH 34 /* number of grid sections */
 #define GRID_EMPTY -1
 #define GRID_OBSTACLE -2
@@ -277,12 +277,15 @@ void updateBoids(){
           const glm::vec3 obs_pos(rx,BOID_Y_OFFSET,rz);
           const float dist = glm::distance(obs_pos,boids[i].getPosition());
           /* determine if object is in path of boid */
-          if(infront(boids[i],obs_pos,3.0f) || dist  < (monkey.radius+1.0f)){
-            glm::vec3 obs_dir(boids[i].getDirection() -
-              glm::normalize(obs_pos-boids[i].getPosition()));
-            const float weight = 1.0f/glm::length(obs_dir);
+          if(infront(boids[i],obs_pos,monkey.radius) || dist  < (monkey.radius+1.0f)){
+            const glm::vec3 obs_dir = glm::normalize(obs_pos-boids[i].getPosition());
+            const glm::vec3 dodge_dir(glm::normalize(boids[i].getDirection() - obs_dir));
+            const float weight = 1.0f/glm::length(dodge_dir);
+
             /* smaller weight when distance is farther */
-            boids[i].addAcceleration(obs_dir*weight*0.1f);
+            boids[i].addAcceleration(dodge_dir*weight*0.5f);
+            /* add a force that pushes away from the obstacle */
+            boids[i].addAcceleration(-obs_dir*weight*0.05f);
           }
         }
       }
@@ -335,8 +338,10 @@ void updateBoids(){
     const float avgmag = glm::length(average_velocity);
 
     /* keep boid moving in direction of goal */
-    if(abs(boids[i].getVelocity().x) < 1.0f){
-      boids[i].addAcceleration(boids[i].goalDirection());
+    //if(glm::length(boids[i].getVelocity()) < 0.5f){
+    if(glm::dot(boids[i].getDirection(),boids[i].goalDirection()) < 0.5f
+  || glm::length(boids[i].getVelocity()) < 1.0f){
+      boids[i].addAcceleration(boids[i].goalDirection()*0.8f);
     }
 
     /* keep boid at velocity of flock mates */
@@ -351,7 +356,7 @@ void updateBoids(){
     /* keep boid within it's flock */
     boids[i].addAcceleration(centre_direction);
 
-    boids[i].step(0.016f);
+    boids[i].step(0.033f);
 
     /* new grid spots */
     const unsigned int nx = getGridCell(boids[i].getPosition().x,GRID_OFFSET);
