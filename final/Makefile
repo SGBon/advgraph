@@ -2,7 +2,7 @@ CXX=g++
 CFLAGS=-c -Wall -Wextra -g -std=c++11 -Wno-write-strings
 LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
-SOURCES=viewer.cpp Shaders.cpp VAO.cpp tiny_obj_loader.cpp
+SOURCES=viewer.cpp Shaders.cpp VAO.cpp tiny_obj_loader.cpp lsystem.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 DEPEND=.depend
 EXECUTABLE=lsys.exe

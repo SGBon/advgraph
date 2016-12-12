@@ -16,6 +16,7 @@
 #define _USE_MATH_DEFINES
 #include "Shaders.h"
 #include "VAO.hpp"
+#include "lsystem.hpp"
 
 float eyex, eyey, eyez;
 
@@ -29,7 +30,8 @@ glm::mat4 projection;
 struct VAO plant;
 
 void init() {
-
+  lsystem lsys;
+  lsys.readlsystem("plant.lsys");
 }
 
 void changeSize(int w, int h) {
