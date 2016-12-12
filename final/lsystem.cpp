@@ -32,7 +32,9 @@ void lsystem::readlsystem(const std::string &filename){
     std::string prod;
     file >> rule;
     file >> prod;
-    productions[rule] = prod;
+    /* safety check so we aren't reading nothing */
+    if(rule.length() > 0)
+      productions[rule] = prod;
   }
 
   for(auto iter = productions.begin(); iter != productions.end();++iter){
@@ -41,11 +43,30 @@ void lsystem::readlsystem(const std::string &filename){
 
   /* expand the axiom using the rules */
   for(unsigned int i = 0; i < generations;++i){
-    std::string current(axiom);
+    const std::string current = axiom;
+    std::string window;
+    std::string next_string("");
+    unsigned int last = 0;
+
     for(unsigned int j = 0; j < current.length();++j){
-      
+      window = current.substr(last,(j-last)+1);
+      //printf("window: %d %d %s\n",last,j,window.c_str());
+      /* check if either rules are in the substring */
+      for(auto iter = productions.begin(); iter != productions.end();++iter){
+        size_t pos = window.find(iter->first);
+
+        // production found
+        if(pos != std::string::npos){
+          // append everything before the production
+          next_string.append(window.substr(0,pos));
+          next_string.append(iter->second);
+          last = j+1;
+        }
+      }
     }
-    printf("%s\n",current.c_str());
+
+    axiom = next_string;
+    printf("current axiom: %s\n",axiom.c_str());
   }
 
   printf("final string: %s\n",axiom.c_str());
@@ -53,13 +74,34 @@ void lsystem::readlsystem(const std::string &filename){
   this->system_string = axiom;
 }
 
-void evaluate_symbol(char symbol){
+void lsystem::evaluate_symbol(char symbol){
   switch(symbol){
+    /* go forward */
     case 'f':
-      // go forward
+      
       break;
+
+    /* turn right */
+    case '+':
+      break;
+
+    /* turn left */
+    case '-':
+      break;
+
+    /* push stack */
+    case '[':
+      this->state_stack.push(state);
+      break;
+
+    /* pop stack */
+    case ']':
+      this->state = state_stack.top();
+      state_stack.pop();
+      break;
+
+    /* silently do nothing */
     default:
-      /* silently nothing */
       break;
   }
 }
