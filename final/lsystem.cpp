@@ -181,10 +181,10 @@ void lsystem::construct_tubes(){
   std::vector<glm::vec4> sections;
   std::vector<glm::vec3> s_norms;
   std::vector<unsigned int> s_ind;
-  for(size_t i = 0; i < this->indices.size() - 1;++i){
+  for(size_t i = 0; i < this->indices.size(); i+=2){
     /* get the base and next position of the section */
-    const glm::vec3 curr = swiz43(this->vertices[i]);
-    const glm::vec3 next = swiz43(this->vertices[i+1]);
+    const glm::vec3 curr = swiz43(this->vertices[this->indices[i]]);
+    const glm::vec3 next = swiz43(this->vertices[this->indices[i+1]]);
 
     const glm::vec3 line = next - curr;
     const glm::vec3 nonco = swap_largest(line);
@@ -204,18 +204,22 @@ void lsystem::construct_tubes(){
     /* add the section with vertex normal */
     sections.push_back(up);
     s_norms.push_back(swiz43(up) - curr);
+    s_ind.push_back(sections.size()-1);
 
     sections.push_back(right);
     s_norms.push_back(swiz43(right) - curr);
+    s_ind.push_back(sections.size()-1);
 
     sections.push_back(down);
     s_norms.push_back(swiz43(down) - curr);
+    s_ind.push_back(sections.size()-1);
 
     sections.push_back(left);
     s_norms.push_back(swiz43(left) - curr);
+    s_ind.push_back(sections.size()-1);
 
     /* link vertices */
-    const unsigned int v1 = 3;
+    //const unsigned int v1 = 3;
   }
 
   /* replace vertices, normals, indices */

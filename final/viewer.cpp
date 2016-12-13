@@ -86,7 +86,7 @@ void displayFunc(void) {
     glUniform4fv(baseLoc,1,glm::value_ptr(black));
 
     glBindVertexArray(plant.id);
-    glDrawElements(GL_LINES, plant.num_indices, GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_POINTS, plant.num_indices, GL_UNSIGNED_INT, NULL);
 
     glutSwapBuffers();
 }
