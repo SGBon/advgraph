@@ -111,10 +111,10 @@ void keyboardFunc(unsigned char key, int x, int y) {
         theta -= 0.1;
         break;
 		case 'q':
-			r -= 0.5;
+			r -= 2.0;
 			break;
 		case 'e':
-			r += 0.5;
+			r += 2.0;
 			break;
     }
 

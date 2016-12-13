@@ -39,6 +39,9 @@ private:
   /* evaluate a symbol in the lsystem, changing the turtle's state */
   void evaluate_symbol(const char symbol);
 
+  /* construct tubes */
+  void construct_tubes();
+
   /* --- evaluation functions --- */
 
   void move_forward();

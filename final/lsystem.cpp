@@ -82,10 +82,16 @@ void lsystem::readlsystem(const std::string &filename){
   //printf("final string: %s\n",axiom.c_str());
   /* set system_string to the expanded axiom */
   this->system_string = axiom;
+
+  /*  now that we have the system, evaluate it*/
   evaluate_system();
+
+  /* after system is completely evaluated, create 'tubes' */
+  construct_tubes();
 }
 
 void lsystem::evaluate_system(){
+  /* step through each symbol in system and evaluate it */
   for(size_t i = 0; i < system_string.length();++i){
     evaluate_symbol(system_string.at(i));
   }
@@ -98,14 +104,24 @@ void lsystem::evaluate_symbol(char symbol){
     move_forward();
     break;
 
-  /* turn right */
+  /* turn right about z-axis */
   case '+':
     rotate(glm::dvec3(0.0,0.0,1.0),true);
     break;
 
-  /* turn left */
+  /* turn left about z-axis */
   case '-':
     rotate(glm::dvec3(0.0,0.0,1.0),false);
+    break;
+
+  /* turn right about y-axis */
+  case '/':
+    rotate(glm::dvec3(0.0,1.0,0.0),true);
+    break;
+
+  /*turn left about y-axis */
+  case '\\':
+    rotate(glm::dvec3(0.0,1.0,0.0),true);
     break;
 
   /* push stack */
@@ -131,8 +147,88 @@ void lsystem::evaluate_symbol(char symbol){
   }
 }
 
+/* swaps the largest components and sets the remaining
+ * component to negative to construct a non-colinear vector
+ */
+glm::vec3 swap_largest(glm::vec3 v){
+  glm::vec3 ret;
+  if(v.x > v.y && v.x > v.z){
+    if(v.y > v.z)
+      ret = glm::vec3(v.y,v.x,-v.z);
+    else
+      ret = glm::vec3(v.z,-v.y,v.x);
+  }else if (v.y > v.x && v.y > v.z){
+    if (v.x > v.z)
+      ret = glm::vec3(v.y,v.x,-v.z);
+    else
+      ret = glm::vec3(-v.x,v.z,v.y);
+  }else if (v.z > v.x && v.z > v.y){
+    if(v.x > v.y)
+      ret = glm::vec3(v.z,-v.y,v.x);
+    else
+      ret = glm::vec3(-v.x,v.z,v.y);
+  }
+
+  return ret;
+}
+
+/* swizzle a 4-vector to a 3-vector */
+glm::vec3 swiz43(const glm::vec4 v){
+  return glm::vec3(v.x,v.y,v.z);
+}
+
+void lsystem::construct_tubes(){
+  std::vector<glm::vec4> sections;
+  std::vector<glm::vec3> s_norms;
+  std::vector<unsigned int> s_ind;
+  for(size_t i = 0; i < this->indices.size() - 1;++i){
+    /* get the base and next position of the section */
+    const glm::vec3 curr = swiz43(this->vertices[i]);
+    const glm::vec3 next = swiz43(this->vertices[i+1]);
+
+    const glm::vec3 line = next - curr;
+    const glm::vec3 nonco = swap_largest(line);
+
+    /* get normal and binormal to line of section */
+    const glm::vec3 norm = glm::normalize(glm::cross(line,nonco));
+    const glm::vec3 binorm = glm::normalize(glm::cross(line,norm));
+
+    /* new vertices
+     * direction meaning is arbitrary
+     */
+    const glm::vec4 up(curr+norm,1.0f);
+    const glm::vec4 right(curr+binorm,1.0f);
+    const glm::vec4 down(curr-norm,1.0f);
+    const glm::vec4 left(curr-binorm,1.0f);
+
+    /* add the section with vertex normal */
+    sections.push_back(up);
+    s_norms.push_back(swiz43(up) - curr);
+
+    sections.push_back(right);
+    s_norms.push_back(swiz43(right) - curr);
+
+    sections.push_back(down);
+    s_norms.push_back(swiz43(down) - curr);
+
+    sections.push_back(left);
+    s_norms.push_back(swiz43(left) - curr);
+
+    /* link vertices */
+    const unsigned int v1 = 3;
+  }
+
+  /* replace vertices, normals, indices */
+  this->vertices = sections;
+  this->normals = s_norms;
+  this->indices = s_ind;
+}
+
+
+
 void lsystem::move_forward(){
   const unsigned int old_index = this->state.index;
+
   this->state.position += (this->state.direction * state.magnitude);
 
   /* make vertices and stuff */
