@@ -33,13 +33,9 @@ void init() {
   lsystem lsys;
   lsys.readlsystem("plant.lsys");
 
+  plant.program = shaderProgram;
   VAO_init(&plant);
   VAO_loadlsystem(&plant,lsys);
-  plant.program = shaderProgram;
-
-  for(int i = 0; i < plant.num_indices;i+=2){
-      printf("%u %u\n",plant.indices[i],plant.indices[i+1]);
-  }
 }
 
 void changeSize(int w, int h) {
@@ -54,7 +50,7 @@ void changeSize(int w, int h) {
 
     glViewport(0, 0, w, h);
 
-    projection = glm::perspective(45.0f, ratio, 1.0f, 100.0f);
+    projection = glm::perspective(45.0f, ratio, 1.0f, 10000.0f);
     glutPostRedisplay();
 }
 
@@ -90,7 +86,7 @@ void displayFunc(void) {
     glUniform4fv(baseLoc,1,glm::value_ptr(black));
 
     glBindVertexArray(plant.id);
-    glDrawElements(GL_POINTS, plant.num_indices, GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_LINES, plant.num_indices, GL_UNSIGNED_INT, NULL);
 
     glutSwapBuffers();
 }
@@ -156,9 +152,6 @@ int main(int argc, char **argv) {
     glEnable(GL_DEPTH_TEST);
     glClearColor(0.5, 0.5, 0.5, 1.0);
 
-    glPointSize(5);
-    glLineWidth(5);
-
     vs = buildShader(GL_VERTEX_SHADER, "general.vs");
     fs = buildShader(GL_FRAGMENT_SHADER, "general.fs");
     shaderProgram = buildProgram(vs, fs, 0);
@@ -166,11 +159,11 @@ int main(int argc, char **argv) {
 
     theta = 1.5;
     phi = 1.5;
-    r = 5.0;
+    r = 500.0;
 
     eyex = 0.0f;//r*sin(theta)*cos(phi);
     eyey = 0.0f;//r*sin(theta)*sin(phi);
-    eyez = -15.0f;//r*cos(theta);
+    eyez = 500.0f;//r*cos(theta);
 
     init();
     glutMainLoop();

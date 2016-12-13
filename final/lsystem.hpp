@@ -9,11 +9,14 @@
 struct turtle_state{
   glm::dvec4 position;
   glm::dvec4 direction;
+  double magnitude;
   unsigned int index = 0; /* vertice index for linking meshes */
 
   turtle_state(glm::vec4 position,glm::vec4 direction):
   position(position),
-  direction(direction){}
+  direction(direction),
+  magnitude(1)
+  {}
 };
 
 class lsystem{
@@ -47,7 +50,6 @@ private:
   std::stack<turtle_state> state_stack;
 
   /* --- turtle parameters --- */
-  float move_magnitude; // magnitude of translations
   double rotation_angle; // magnitude of rotations
 
   std::string system_string;

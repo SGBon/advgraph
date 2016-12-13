@@ -22,11 +22,11 @@ void lsystem::readlsystem(const std::string &filename){
   */
   unsigned int generations;
   file >> generations;
-  file >> this->move_magnitude;
+  file >> state.magnitude;
   file >> this->rotation_angle;
   this->rotation_angle = glm::radians(this->rotation_angle);
 
-  printf("%d %f %f\n",generations,this->move_magnitude,this->rotation_angle);
+  printf("Generations: %d magnitude: %f angle: %f\n",generations,state.magnitude,this->rotation_angle);
 
   std::string axiom;
   file >> axiom;
@@ -40,6 +40,8 @@ void lsystem::readlsystem(const std::string &filename){
     if(rule.length() > 0)
       productions[rule] = prod;
   }
+
+  file.close();
 
   for(auto iter = productions.begin(); iter != productions.end();++iter){
     printf("%s: %s\n",iter->first.c_str(),iter->second.c_str());
@@ -74,10 +76,10 @@ void lsystem::readlsystem(const std::string &filename){
     }
 
     axiom = next_string;
-    printf("current axiom: %s\n",axiom.c_str());
+    //printf("current axiom: %s\n",axiom.c_str());
   }
 
-  printf("final string: %s\n",axiom.c_str());
+  //printf("final string: %s\n",axiom.c_str());
   /* set system_string to the expanded axiom */
   this->system_string = axiom;
   evaluate_system();
@@ -118,6 +120,11 @@ void lsystem::evaluate_symbol(char symbol){
     state_stack.pop();
     break;
 
+  /* shorten distances */
+  case 's':
+    state.magnitude *= 0.8;
+    break;
+
   /* silently do nothing */
   default:
     break;
@@ -126,7 +133,7 @@ void lsystem::evaluate_symbol(char symbol){
 
 void lsystem::move_forward(){
   const unsigned int old_index = this->state.index;
-  this->state.position += this->state.direction;
+  this->state.position += (this->state.direction * state.magnitude);
 
   /* make vertices and stuff */
   this->vertices.push_back(this->state.position);
@@ -180,6 +187,4 @@ void lsystem::rotate(glm::dvec3 axis, bool reverse){
   }
 
   state.direction = glm::dvec4(Q3.x,Q3.y,Q3.z,0.0f);
-
-  //printf("new direction %f %f %f\n",state.direction.x,state.direction.y,state.direction.z);
 }

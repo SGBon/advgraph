@@ -28,7 +28,6 @@ void VAO_loadObj(struct VAO *vao, char *filename){
     vao->vertices[i] = shapes[0].mesh.positions[i];
   }
 
-
   /* get vertex normals */
   vao->num_normals = shapes[0].mesh.normals.size();
   vao->normals = new GLfloat[vao->num_normals];
