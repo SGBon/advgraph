@@ -24,6 +24,10 @@ public:
   /* read and expand the lsystem specifier in the file at filename */
   void readlsystem(const std::string &filename);
 
+  /* vertices, indices, and normals of the evaluated lsystem */
+  std::vector<glm::vec4> vertices;
+  std::vector<glm::vec3> normals;
+  std::vector<unsigned int> indices;
 
 private:
   /* evaluate the expanded lsystem */
@@ -41,10 +45,6 @@ private:
   /* --- state and stack --- */
   turtle_state state;
   std::stack<turtle_state> state_stack;
-
-  /* vertices, indices, and normals of the evaluated lsystem */
-  std::vector<glm::dvec4> vertices;
-  std::vector<unsigned int> indices;
 
   /* --- turtle parameters --- */
   float move_magnitude; // magnitude of translations

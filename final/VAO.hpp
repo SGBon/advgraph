@@ -5,9 +5,10 @@
 
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <stdlib.h>
+#include <cstdlib>
+#include "lsystem.hpp"
 
-#define VERT_WIDTH 3
+#define VERT_WIDTH 4
 #define NORM_WIDTH 3
 
 struct VAO{
@@ -28,8 +29,6 @@ struct VAO{
   GLuint vbuffer;
   GLuint ibuffer;
 
-  float radius;
-
   /* texture/buffer state */
   enum vao_state{
     undefined, /* memory not yet allocated */
@@ -42,6 +41,9 @@ void VAO_init(struct VAO *vao);
 
 /* create a VAO from a .obj file stored in filename */
 void VAO_loadObj(struct VAO *vao, char *filename);
+
+/* create VAO from an lsystem */
+void VAO_loadlsystem(struct VAO *vao, const lsystem &lsys);
 
 /* release memory allocated to the VAO */
 void VAO_destroy(struct VAO *vao);

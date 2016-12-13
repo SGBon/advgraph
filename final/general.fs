@@ -14,7 +14,7 @@ out vec4 fragcolor;
 void main() {
 	const vec4 white = vec4(1.0, 1.0, 1.0, 1.0);
 	float diffuse;
-	vec3 L = normalize(vec3(0.0, 32.0, 0.0) - position.xyz);
+	vec3 L = normalize(vec3(0.0, 1.0, 0.0) - position.xyz);
 	vec3 N;
 	vec3 H = normalize(L+(Eye - position.xyz));
 	float specular;

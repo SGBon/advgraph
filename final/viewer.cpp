@@ -32,6 +32,14 @@ struct VAO plant;
 void init() {
   lsystem lsys;
   lsys.readlsystem("plant.lsys");
+
+  VAO_init(&plant);
+  VAO_loadlsystem(&plant,lsys);
+  plant.program = shaderProgram;
+
+  for(int i = 0; i < plant.num_indices;i+=2){
+      printf("%u %u\n",plant.indices[i],plant.indices[i+1]);
+  }
 }
 
 void changeSize(int w, int h) {
@@ -54,13 +62,15 @@ void displayFunc(void) {
     GLuint viewLoc;
     GLuint projLoc;
     GLuint eyeLoc;
+    GLuint baseLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     const glm::mat4 view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
         glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 0.0f, 1.0f));
+        glm::vec3(0.0f, 1.0f, 0.0f));
 
+    const glm::vec4 black(0.0f,0.0f,0.0f,1.0f);
 
     /* draw the ground */
     const GLuint lprog = plant.program;
@@ -76,8 +86,11 @@ void displayFunc(void) {
     eyeLoc = glGetUniformLocation(lprog,"Eye");
     glUniform3f(eyeLoc,eyex,eyey,eyez);
 
+    baseLoc = glGetUniformLocation(lprog,"base");
+    glUniform4fv(baseLoc,1,glm::value_ptr(black));
+
     glBindVertexArray(plant.id);
-    glDrawElements(GL_TRIANGLES, plant.num_indices, GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_POINTS, plant.num_indices, GL_UNSIGNED_INT, NULL);
 
     glutSwapBuffers();
 }
@@ -141,7 +154,10 @@ int main(int argc, char **argv) {
     glutIdleFunc(idleFunc);
 
     glEnable(GL_DEPTH_TEST);
-    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClearColor(0.5, 0.5, 0.5, 1.0);
+
+    glPointSize(5);
+    glLineWidth(5);
 
     vs = buildShader(GL_VERTEX_SHADER, "general.vs");
     fs = buildShader(GL_FRAGMENT_SHADER, "general.fs");
@@ -150,11 +166,11 @@ int main(int argc, char **argv) {
 
     theta = 1.5;
     phi = 1.5;
-    r = 32.0;
+    r = 5.0;
 
-    eyex = r*sin(theta)*cos(phi);
-    eyey = r*sin(theta)*sin(phi);
-    eyez = r*cos(theta);
+    eyex = 0.0f;//r*sin(theta)*cos(phi);
+    eyey = 0.0f;//r*sin(theta)*sin(phi);
+    eyez = -15.0f;//r*cos(theta);
 
     init();
     glutMainLoop();

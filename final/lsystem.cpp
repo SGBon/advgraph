@@ -54,19 +54,23 @@ void lsystem::readlsystem(const std::string &filename){
 
     for(unsigned int j = 0; j < current.length();++j){
       window = current.substr(last,(j-last)+1);
-      //printf("window: %d %d %s\n",last,j,window.c_str());
       /* check if either rules are in the substring */
       for(auto iter = productions.begin(); iter != productions.end();++iter){
         size_t pos = window.find(iter->first);
 
         // production found
         if(pos != std::string::npos){
-          // append everything before the production
           next_string.append(window.substr(0,pos));
           next_string.append(iter->second);
           last = j+1;
+          window = "";
         }
       }
+    }
+
+    /* need to add remaining bit of window left */
+    if(window.length() > 0){
+      next_string.append(window);
     }
 
     axiom = next_string;
@@ -82,9 +86,6 @@ void lsystem::readlsystem(const std::string &filename){
 void lsystem::evaluate_system(){
   for(size_t i = 0; i < system_string.length();++i){
     evaluate_symbol(system_string.at(i));
-  }
-  for(size_t i = 0; i < vertices.size();++i){
-    printf("%f %f %f\n",vertices[i].x,vertices[i].y,vertices[i].z);
   }
 }
 
@@ -126,8 +127,10 @@ void lsystem::evaluate_symbol(char symbol){
 void lsystem::move_forward(){
   const unsigned int old_index = this->state.index;
   this->state.position += this->state.direction;
+
   /* make vertices and stuff */
   this->vertices.push_back(this->state.position);
+  this->normals.push_back(glm::vec3(0.0f,1.0f,0.0f));
   this->state.index = this->vertices.size() - 1;
   this->indices.push_back(old_index);
   this->indices.push_back(this->state.index);
@@ -178,5 +181,5 @@ void lsystem::rotate(glm::dvec3 axis, bool reverse){
 
   state.direction = glm::dvec4(Q3.x,Q3.y,Q3.z,0.0f);
 
-  printf("new direction %f %f %f\n",state.direction.x,state.direction.y,state.direction.z);
+  //printf("new direction %f %f %f\n",state.direction.x,state.direction.y,state.direction.z);
 }
