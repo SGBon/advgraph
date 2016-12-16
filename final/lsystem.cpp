@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstdio>
 #include <cmath>
+#include "glm_helpers.hpp"
 
 lsystem::lsystem(const glm::vec4 origin,
   const glm::vec4 direction):
@@ -147,7 +148,6 @@ void lsystem::evaluate_symbol(char symbol){
     assert(!state_stack.empty());
     /* on a stack pop, current vertex before pop will be a leaf node */
     segment_spec[state.index] = LEAF;
-    leaf_points.push_back(state.position);
     state = state_stack.top();
     state_stack.pop();
     break;
@@ -224,36 +224,6 @@ void lsystem::rotate(glm::dvec3 axis, bool reverse){
   }
 
   state.direction = glm::dvec4(Q3.x,Q3.y,Q3.z,0.0f);
-}
-
-/* swaps the largest components and sets the remaining
- * component to negative to construct a non-colinear vector
- */
-glm::vec3 swap_largest(glm::vec3 v){
-  glm::vec3 ret;
-  if(v.x > v.y && v.x > v.z){
-    if(v.y > v.z)
-      ret = glm::vec3(v.y,v.x,-v.z);
-    else
-      ret = glm::vec3(v.z,-v.y,v.x);
-  }else if (v.y > v.x && v.y > v.z){
-    if (v.x > v.z)
-      ret = glm::vec3(v.y,v.x,-v.z);
-    else
-      ret = glm::vec3(-v.x,v.z,v.y);
-  }else if (v.z > v.x && v.z > v.y){
-    if(v.x > v.y)
-      ret = glm::vec3(v.z,-v.y,v.x);
-    else
-      ret = glm::vec3(-v.x,v.z,v.y);
-  }
-
-  return ret;
-}
-
-/* swizzle a 4-vector to a 3-vector */
-glm::vec3 swiz43(const glm::vec4 v){
-  return glm::vec3(v.x,v.y,v.z);
 }
 
 void lsystem::construct_tubes(){

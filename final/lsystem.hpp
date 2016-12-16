@@ -22,13 +22,13 @@ struct turtle_state{
 };
 
 class lsystem{
+public:
   /* specifies if vertex/segment is a general/leaf vertex/segment */
   enum seg_spec{
     GEN,
     LEAF
   };
 
-public:
   lsystem(const glm::vec4 origin = glm::vec4(0.0,0.0,0.0,1.0),
     const glm::vec4 direction = glm::vec4(0.0,1.0,0.0,0.0));
 
@@ -40,9 +40,6 @@ public:
   std::vector<seg_spec> segment_spec;
   std::vector<glm::vec3> normals;
   std::vector<unsigned int> indices;
-
-  /* points on lsystem where there are leaves */
-  std::vector<glm::vec4> leaf_points;
 
 private:
   /* evaluate the expanded lsystem */

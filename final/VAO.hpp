@@ -16,6 +16,7 @@ struct VAO{
   GLfloat *vertices;
   GLfloat *normals;
   GLuint *indices;
+  GLubyte *spec;
 
   /* buffer sizes */
   size_t num_vertices;

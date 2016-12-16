@@ -72,14 +72,23 @@ void VAO_loadlsystem(struct VAO *vao, const lsystem &lsys){
   vao->num_normals = lsys.normals.size() * NORM_WIDTH;
   vao->num_indices = lsys.indices.size();
 
+  const size_t num_spec = vao->num_vertices;
+  /* specifies if vertex/segment is a general/leaf vertex/segment */
+  enum seg_spec{
+    GEN,
+    LEAF
+  };
+
   /* load vertices */
   vao->vertices = new GLfloat[vao->num_vertices];
+  vao->spec = new GLubyte[num_spec];
   for(size_t i = 0;i < lsys.vertices.size();++i){
     glm::vec4 v = lsys.vertices[i];
     vao->vertices[i*VERT_WIDTH] = v.x;
     vao->vertices[i*VERT_WIDTH + 1] = v.y;
     vao->vertices[i*VERT_WIDTH + 2] = v.z;
     vao->vertices[i*VERT_WIDTH + 3] = v.w;
+    vao->spec[i] = lsys.segment_spec[i/4] == lsystem::GEN ? 0 : 1;
   }
 
   /* load normals */
@@ -103,9 +112,10 @@ void VAO_loadlsystem(struct VAO *vao, const lsystem &lsys){
   /* create and load vertex buffers */
   glGenBuffers(1,&vao->vbuffer);
   glBindBuffer(GL_ARRAY_BUFFER,vao->vbuffer);
-  glBufferData(GL_ARRAY_BUFFER,(vao->num_vertices + vao->num_normals)*sizeof(GLfloat),NULL,GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER,(vao->num_vertices + vao->num_normals)*sizeof(GLfloat) + (num_spec)*sizeof(GLubyte),NULL,GL_STATIC_DRAW);
   glBufferSubData(GL_ARRAY_BUFFER,0,vao->num_vertices*sizeof(GLfloat),vao->vertices);
   glBufferSubData(GL_ARRAY_BUFFER,vao->num_vertices*sizeof(GLfloat),vao->num_normals*sizeof(GLfloat),vao->normals);
+  glBufferSubData(GL_ARRAY_BUFFER,(vao->num_vertices + vao->num_normals)*sizeof(GLfloat),num_spec*sizeof(GLubyte),vao->spec);
 
   /* load indices */
   glGenBuffers(1,&vao->ibuffer);
@@ -121,6 +131,10 @@ void VAO_loadlsystem(struct VAO *vao, const lsystem &lsys){
   const GLint vNormal = glGetAttribLocation(vao->program,"vNormal");
   glVertexAttribPointer(vNormal,NORM_WIDTH,GL_FLOAT,GL_FALSE,0,(void*)(vao->num_vertices*sizeof(GLfloat)));
   glEnableVertexAttribArray(vNormal);
+
+  const GLint vSpec = glGetAttribLocation(vao->program,"vSpec");
+  glVertexAttribPointer(vSpec,1,GL_UNSIGNED_BYTE,GL_FALSE,0,(void*)((vao->num_vertices + vao->num_normals)*sizeof(GLfloat)));
+  glEnableVertexAttribArray(vSpec);
 
   vao->b_state = VAO::post_buffer;
 }

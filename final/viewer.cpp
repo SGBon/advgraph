@@ -15,6 +15,7 @@
 #include "VAO.hpp"
 #include "lsystem.hpp"
 #include "Camera.hpp"
+#include "glm_helpers.hpp"
 
 static tdogl::Camera camera;
 /* default value */
@@ -35,8 +36,6 @@ GLuint shaderProgram;
 glm::mat4 projection;
 
 struct VAO plant;
-struct VAO leaf;
-
 
 void init() {
   lsystem lsys;
@@ -67,33 +66,27 @@ void displayFunc(void) {
     GLuint viewLoc;
     GLuint projLoc;
     GLuint eyeLoc;
-    GLuint baseLoc;
     GLuint lightLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     const glm::mat4 view = camera.view();
 
-    const glm::vec4 black(0.4f,0.25f,0.04f,1.0f);
+    /* draw the plant */
+    const GLuint pprog = plant.program;
+    glUseProgram(pprog);
 
-    /* draw the ground */
-    const GLuint lprog = plant.program;
-    glUseProgram(lprog);
-
-    const glm::mat4 model = view;
-    viewLoc = glGetUniformLocation(lprog, "modelView");
+    glm::mat4 model = view;
+    viewLoc = glGetUniformLocation(pprog, "modelView");
     glUniformMatrix4fv(viewLoc, 1, 0, glm::value_ptr(model));
 
-    projLoc = glGetUniformLocation(lprog, "projection");
+    projLoc = glGetUniformLocation(pprog, "projection");
     glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
-    eyeLoc = glGetUniformLocation(lprog,"Eye");
+    eyeLoc = glGetUniformLocation(pprog,"Eye");
     glUniform3fv(eyeLoc,1,glm::value_ptr(camera.position()));
 
-    baseLoc = glGetUniformLocation(lprog,"base");
-    glUniform4fv(baseLoc,1,glm::value_ptr(black));
-
-    lightLoc = glGetUniformLocation(lprog,"light");
+    lightLoc = glGetUniformLocation(pprog,"light");
     glUniform3f(lightLoc,0.0,10.0,10.0);
 
     glBindVertexArray(plant.id);
