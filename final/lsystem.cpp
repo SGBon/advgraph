@@ -95,6 +95,8 @@ void lsystem::evaluate_system(){
   for(size_t i = 0; i < system_string.length();++i){
     evaluate_symbol(system_string.at(i));
   }
+  /* set last vertex to leaf */
+  segment_spec[segment_spec.size()-1] = LEAF;
 }
 
 void lsystem::evaluate_symbol(char symbol){
@@ -132,6 +134,9 @@ void lsystem::evaluate_symbol(char symbol){
   /* pop stack */
   case ']':
     assert(!state_stack.empty());
+    /* on a stack pop, current vertex before pop will be a leaf node */
+    segment_spec[state.index] = LEAF;
+    leaf_points.push_back(state.position);
     state = state_stack.top();
     state_stack.pop();
     break;
@@ -181,6 +186,8 @@ void lsystem::construct_tubes(){
   std::vector<glm::vec4> sections;
   std::vector<glm::vec3> s_norms;
   std::vector<unsigned int> s_ind;
+
+  /* construct vertices about each vertex in lsystem to form tubes */
   for(size_t i = 0; i < this->indices.size(); i+=2){
     /* get the base and next position of the section */
     const glm::vec3 curr = swiz43(this->vertices[this->indices[i]]);
@@ -194,7 +201,8 @@ void lsystem::construct_tubes(){
     const glm::vec3 binorm = glm::normalize(glm::cross(line,norm));
 
     /* new vertices
-     * direction meaning is arbitrary
+     * direction meaning is arbitrary, what's important is that it's
+     * a square around the point
      */
     const glm::vec4 up(curr+norm,1.0f);
     const glm::vec4 right(curr+binorm,1.0f);
@@ -217,15 +225,58 @@ void lsystem::construct_tubes(){
     sections.push_back(left);
     s_norms.push_back(swiz43(left) - curr);
     s_ind.push_back(sections.size()-1);
+  }
 
-    /* link vertices */
-    //const unsigned int v1 = 3;
+  /* link vertices to form tubes */
+  std::vector<unsigned int> t_ind;
+  for(unsigned int i = 0; i < s_ind.size();i+=4){
+    /* go through one segment (4 vertices) at a time and connect them
+     * to the next segment; skip leaf segments since they do not
+     * connect forward
+     */
+    if(segment_spec[i/4] == LEAF) continue;
+
+    /* link the: first side */
+    t_ind.push_back(i);
+    t_ind.push_back(i+1);
+    t_ind.push_back(i+4);
+
+    t_ind.push_back(i+4);
+    t_ind.push_back(i+1);
+    t_ind.push_back(i+5);
+
+    /* second side */
+    t_ind.push_back(i+3);
+    t_ind.push_back(i);
+    t_ind.push_back(i+7);
+
+    t_ind.push_back(i+7);
+    t_ind.push_back(i);
+    t_ind.push_back(i+4);
+
+    /* third side */
+    t_ind.push_back(i+2);
+    t_ind.push_back(i+3);
+    t_ind.push_back(i+6);
+
+    t_ind.push_back(i+6);
+    t_ind.push_back(i+3);
+    t_ind.push_back(i+7);
+
+    /* fourth side */
+    t_ind.push_back(i+1);
+    t_ind.push_back(i+2);
+    t_ind.push_back(i+5);
+
+    t_ind.push_back(i+5);
+    t_ind.push_back(i+2);
+    t_ind.push_back(i+6);
   }
 
   /* replace vertices, normals, indices */
   this->vertices = sections;
   this->normals = s_norms;
-  this->indices = s_ind;
+  this->indices = t_ind;
 }
 
 
@@ -237,6 +288,7 @@ void lsystem::move_forward(){
 
   /* make vertices and stuff */
   this->vertices.push_back(this->state.position);
+  this->segment_spec.push_back(GEN);
   this->normals.push_back(glm::vec3(0.0f,1.0f,0.0f));
   this->state.index = this->vertices.size() - 1;
   this->indices.push_back(old_index);

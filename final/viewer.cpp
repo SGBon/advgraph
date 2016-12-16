@@ -66,7 +66,7 @@ void displayFunc(void) {
         glm::vec3(0.0f, 0.0f, 0.0f),
         glm::vec3(0.0f, 1.0f, 0.0f));
 
-    const glm::vec4 black(0.0f,0.0f,0.0f,1.0f);
+    const glm::vec4 black(0.4f,0.25f,0.04f,1.0f);
 
     /* draw the ground */
     const GLuint lprog = plant.program;
@@ -86,7 +86,7 @@ void displayFunc(void) {
     glUniform4fv(baseLoc,1,glm::value_ptr(black));
 
     glBindVertexArray(plant.id);
-    glDrawElements(GL_POINTS, plant.num_indices, GL_UNSIGNED_INT, NULL);
+    glDrawElements(GL_TRIANGLES, plant.num_indices, GL_UNSIGNED_INT, NULL);
 
     glutSwapBuffers();
 }
