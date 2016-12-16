@@ -4,9 +4,6 @@
 *
 */
 
-#include <random>
-#define _USE_MATH_DEFINES
-#include <cmath>
 #include <cstdio>
 #include <GL/glew.h>
 #include <GL/glut.h>
@@ -17,6 +14,16 @@
 #include "Shaders.h"
 #include "VAO.hpp"
 #include "lsystem.hpp"
+#include "Camera.hpp"
+
+static tdogl::Camera camera;
+/* default value */
+static float movespeed = 1.0f;
+
+const unsigned short WINDOW_WIDTH = 1024;
+const unsigned short WINDOW_HEIGHT = 640;
+const unsigned short WINDOW_CENTER_X = WINDOW_WIDTH/2;
+const unsigned short WINDOW_CENTER_Y = WINDOW_HEIGHT/2;
 
 float eyex, eyey, eyez;
 
@@ -28,6 +35,8 @@ GLuint shaderProgram;
 glm::mat4 projection;
 
 struct VAO plant;
+struct VAO leaf;
+
 
 void init() {
   lsystem lsys;
@@ -39,7 +48,6 @@ void init() {
 }
 
 void changeSize(int w, int h) {
-
     // Prevent a divide by zero, when window is too short
     // (you cant make a window of zero width).
 
@@ -48,10 +56,11 @@ void changeSize(int w, int h) {
 
     float ratio = 1.0 * w / h;
 
+    camera.setViewportAspectRatio(ratio);
+
     glViewport(0, 0, w, h);
 
-    projection = glm::perspective(45.0f, ratio, 1.0f, 10000.0f);
-    glutPostRedisplay();
+    projection = camera.projection();
 }
 
 void displayFunc(void) {
@@ -62,9 +71,7 @@ void displayFunc(void) {
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    const glm::mat4 view = glm::lookAt(glm::vec3(eyex, eyey, eyez),
-        glm::vec3(0.0f, 0.0f, 0.0f),
-        glm::vec3(0.0f, 1.0f, 0.0f));
+    const glm::mat4 view = camera.view();
 
     const glm::vec4 black(0.4f,0.25f,0.04f,1.0f);
 
@@ -80,7 +87,7 @@ void displayFunc(void) {
     glUniformMatrix4fv(projLoc, 1, 0, glm::value_ptr(projection));
 
     eyeLoc = glGetUniformLocation(lprog,"Eye");
-    glUniform3f(eyeLoc,eyex,eyey,eyez);
+    glUniform3fv(eyeLoc,1,glm::value_ptr(camera.position()));
 
     baseLoc = glGetUniformLocation(lprog,"base");
     glUniform4fv(baseLoc,1,glm::value_ptr(black));
@@ -92,79 +99,77 @@ void displayFunc(void) {
 }
 
 void idleFunc(void){
+  glutWarpPointer(WINDOW_CENTER_X,WINDOW_CENTER_Y);
   glutPostRedisplay();
 }
 
+void mouseDragFunc(int x, int y){
+  const float sensitivity = 0.1f;
+  camera.offsetOrientation((y - WINDOW_CENTER_Y)*sensitivity,(x - WINDOW_CENTER_X)*sensitivity);
+}
+
 void keyboardFunc(unsigned char key, int x, int y) {
-
-    switch (key) {
-    case 'a':
-        phi -= 0.1;
-        break;
-    case 'd':
-        phi += 0.1;
-        break;
-    case 'w':
-        theta += 0.1;
-        break;
-    case 's':
-        theta -= 0.1;
-        break;
-		case 'q':
-			r -= 2.0;
-			break;
-		case 'e':
-			r += 2.0;
-			break;
-    }
-
-    eyex = r*sin(theta)*cos(phi);
-    eyey = r*sin(theta)*sin(phi);
-    eyez = r*cos(theta);
-
-    glutPostRedisplay();
-
+  #define ESC_KEY 27
+  switch (key) {
+  case 'a':
+    camera.offsetPosition(-camera.right()*movespeed);
+    break;
+  case 'd':
+    camera.offsetPosition(camera.right()*movespeed);
+    break;
+  case 'w':
+    camera.offsetPosition(camera.forward()*movespeed);
+    break;
+  case 's':
+    camera.offsetPosition(-camera.forward()*movespeed);
+    break;
+	case 'z':
+    camera.offsetPosition(camera.up()*movespeed);
+		break;
+	case 'x':
+    camera.offsetPosition(-camera.up()*movespeed);
+		break;
+  case ESC_KEY:
+    exit(0);
+    break;
+  }
+  glutPostRedisplay();
 }
 
 int main(int argc, char **argv) {
-    int fs;
-    int vs;
+  int fs;
+  int vs;
 
-		glutInit(&argc, argv);
-		glutInitContextVersion(3,3);
-    glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-    glutInitWindowPosition(100, 100);
-    glutInitWindowSize(640, 640);
-    glutCreateWindow("Viewer");
+	glutInit(&argc, argv);
+	glutInitContextVersion(3,3);
+  glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
+  glutInitWindowPosition(100, 100);
+  glutInitWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
+  glutCreateWindow("Viewer");
 
-		glewExperimental = GL_TRUE;
-    GLenum error = glewInit();
-    if (error != GLEW_OK) {
-        printf("Error starting GLEW: %s\n", glewGetErrorString(error));
-        exit(0);
-    }
+	glewExperimental = GL_TRUE;
+  GLenum error = glewInit();
+  if (error != GLEW_OK) {
+      printf("Error starting GLEW: %s\n", glewGetErrorString(error));
+      exit(0);
+  }
 
-    glutDisplayFunc(displayFunc);
-    glutReshapeFunc(changeSize);
-    glutKeyboardFunc(keyboardFunc);
-    glutIdleFunc(idleFunc);
+  glutDisplayFunc(displayFunc);
+  glutReshapeFunc(changeSize);
+  glutKeyboardFunc(keyboardFunc);
+  glutMotionFunc(mouseDragFunc);
+  glutIdleFunc(idleFunc);
 
-    glEnable(GL_DEPTH_TEST);
-    glClearColor(0.5, 0.5, 0.5, 1.0);
+  glEnable(GL_DEPTH_TEST);
+  glClearColor(0.5, 0.5, 0.5, 1.0);
 
-    vs = buildShader(GL_VERTEX_SHADER, "general.vs");
-    fs = buildShader(GL_FRAGMENT_SHADER, "general.fs");
-    shaderProgram = buildProgram(vs, fs, 0);
-    dumpProgram(shaderProgram, "ground shader");
+  vs = buildShader(GL_VERTEX_SHADER, "general.vs");
+  fs = buildShader(GL_FRAGMENT_SHADER, "general.fs");
+  shaderProgram = buildProgram(vs, fs, 0);
+  dumpProgram(shaderProgram, "ground shader");
 
-    theta = 1.5;
-    phi = 1.5;
-    r = 500.0;
+  camera.setNearAndFarPlanes(1.0f,1000.0f);
 
-    eyex = 0.0f;//r*sin(theta)*cos(phi);
-    eyey = 0.0f;//r*sin(theta)*sin(phi);
-    eyez = 500.0f;//r*cos(theta);
-
-    init();
-    glutMainLoop();
+  init();
+  glutMainLoop();
 }
