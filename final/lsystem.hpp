@@ -10,12 +10,14 @@ struct turtle_state{
   glm::dvec4 position;
   glm::dvec4 direction;
   double magnitude;
+  double width;
   unsigned int index = 0; /* vertice index for linking meshes */
 
   turtle_state(glm::vec4 position,glm::vec4 direction):
   position(position),
   direction(direction),
-  magnitude(1)
+  magnitude(1),
+  width(4)
   {}
 };
 

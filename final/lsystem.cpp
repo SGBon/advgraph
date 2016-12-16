@@ -123,12 +123,23 @@ void lsystem::evaluate_symbol(char symbol){
 
   /*turn left about y-axis */
   case '\\':
-    rotate(glm::dvec3(0.0,1.0,0.0),true);
+    rotate(glm::dvec3(0.0,1.0,0.0),false);
+    break;
+
+  /* turn right about x-axis */
+  case '>':
+    rotate(glm::dvec3(1.0,0.0,0.0),true);
+    break;
+
+  /* turn left about x-axis */
+  case '<':
+    rotate(glm::dvec3(1.0,0.0,0.0),false);
     break;
 
   /* push stack */
   case '[':
     state_stack.push(state);
+    state.width *=0.8f;
     break;
 
   /* pop stack */
@@ -150,6 +161,69 @@ void lsystem::evaluate_symbol(char symbol){
   default:
     break;
   }
+}
+
+void lsystem::move_forward(){
+  const unsigned int old_index = this->state.index;
+
+  this->state.position += (this->state.direction * state.magnitude);
+  /* encoding width in the w component, gets filtered out later */
+  this->state.position.w = state.width;
+  state.width *=0.99; /* decay width */
+
+  /* make vertices and stuff */
+  this->vertices.push_back(this->state.position);
+  this->segment_spec.push_back(GEN);
+  this->normals.push_back(glm::vec3(0.0f,1.0f,0.0f));
+  this->state.index = this->vertices.size() - 1;
+  this->indices.push_back(old_index);
+  this->indices.push_back(this->state.index);
+}
+
+/* multiplication of 2 quaternions */
+glm::dvec4 quat_prod(const glm::dvec4 &Q1, const glm::dvec4 &Q2){
+  const double w1 = Q1.w;
+  const double w2 = Q2.w;
+  const glm::dvec3 v1(Q1.x,Q1.y,Q1.z);
+  const glm::dvec3 v2(Q2.x,Q2.y,Q2.z);
+
+  const double wf = w1*w2 - glm::dot(v1,v2);
+  const glm::dvec3 vf(glm::cross(v1,v2) + (w1*v2) + (w2*v1));
+  return glm::dvec4(vf.x,vf.y,vf.z,wf);
+}
+
+/* inversion of a quaternion */
+glm::dvec4 quat_inv(const glm::dvec4 &Q){
+  const double qnorm = sqrt(Q.x*Q.x +
+    Q.y*Q.y +
+    Q.z*Q.z +
+    Q.w*Q.w);
+  const glm::dvec4 Q_con(-Q.x,-Q.y,-Q.z,Q.w);
+
+  return glm::dvec4(Q_con/qnorm);
+}
+
+/* solution inspired by http://paulbourke.net/geometry/rotate/ */
+void lsystem::rotate(glm::dvec3 axis, bool reverse){
+  axis = glm::normalize(axis);
+
+  /* make quaternions */
+  const glm::dvec4 Q2(axis.x*sin(rotation_angle/2.0),
+    axis.y*sin(rotation_angle/2.0),
+    axis.z*sin(rotation_angle/2.0),
+    cos(rotation_angle/2.0));
+
+  const glm::dvec4 Q2_inv(quat_inv(Q2));
+
+  glm::dvec4 Q3;
+
+  if(reverse){
+    Q3 = quat_prod(quat_prod(Q2,state.direction),Q2_inv);
+  }else{
+    Q3 = quat_prod(quat_prod(Q2_inv,state.direction),Q2);
+  }
+
+  state.direction = glm::dvec4(Q3.x,Q3.y,Q3.z,0.0f);
 }
 
 /* swaps the largest components and sets the remaining
@@ -196,9 +270,12 @@ void lsystem::construct_tubes(){
     const glm::vec3 line = next - curr;
     const glm::vec3 nonco = swap_largest(line);
 
+    const float width = (this->vertices[this->indices[i]].w +
+      this->vertices[this->indices[i+1]].w) / 2.0f;
+
     /* get normal and binormal to line of section */
-    const glm::vec3 norm = glm::normalize(glm::cross(line,nonco));
-    const glm::vec3 binorm = glm::normalize(glm::cross(line,norm));
+    const glm::vec3 norm = glm::normalize(glm::cross(line,nonco)) * width;
+    const glm::vec3 binorm = glm::normalize(glm::cross(line,norm)) * width;
 
     /* new vertices
      * direction meaning is arbitrary, what's important is that it's
@@ -277,66 +354,4 @@ void lsystem::construct_tubes(){
   this->vertices = sections;
   this->normals = s_norms;
   this->indices = t_ind;
-}
-
-
-
-void lsystem::move_forward(){
-  const unsigned int old_index = this->state.index;
-
-  this->state.position += (this->state.direction * state.magnitude);
-
-  /* make vertices and stuff */
-  this->vertices.push_back(this->state.position);
-  this->segment_spec.push_back(GEN);
-  this->normals.push_back(glm::vec3(0.0f,1.0f,0.0f));
-  this->state.index = this->vertices.size() - 1;
-  this->indices.push_back(old_index);
-  this->indices.push_back(this->state.index);
-}
-
-/* multiplication of 2 quaternions */
-glm::dvec4 quat_prod(const glm::dvec4 &Q1, const glm::dvec4 &Q2){
-  const double w1 = Q1.w;
-  const double w2 = Q2.w;
-  const glm::dvec3 v1(Q1.x,Q1.y,Q1.z);
-  const glm::dvec3 v2(Q2.x,Q2.y,Q2.z);
-
-  const double wf = w1*w2 - glm::dot(v1,v2);
-  const glm::dvec3 vf(glm::cross(v1,v2) + (w1*v2) + (w2*v1));
-  return glm::dvec4(vf.x,vf.y,vf.z,wf);
-}
-
-/* inversion of a quaternion */
-glm::dvec4 quat_inv(const glm::dvec4 &Q){
-  const double qnorm = sqrt(Q.x*Q.x +
-    Q.y*Q.y +
-    Q.z*Q.z +
-    Q.w*Q.w);
-  const glm::dvec4 Q_con(-Q.x,-Q.y,-Q.z,Q.w);
-
-  return glm::dvec4(Q_con/qnorm);
-}
-
-/* solution inspired by http://paulbourke.net/geometry/rotate/ */
-void lsystem::rotate(glm::dvec3 axis, bool reverse){
-  axis = glm::normalize(axis);
-
-  /* make quaternions */
-  const glm::dvec4 Q2(axis.x*sin(rotation_angle/2.0),
-    axis.y*sin(rotation_angle/2.0),
-    axis.z*sin(rotation_angle/2.0),
-    cos(rotation_angle/2.0));
-
-  const glm::dvec4 Q2_inv(quat_inv(Q2));
-
-  glm::dvec4 Q3;
-
-  if(reverse){
-    Q3 = quat_prod(quat_prod(Q2,state.direction),Q2_inv);
-  }else{
-    Q3 = quat_prod(quat_prod(Q2_inv,state.direction),Q2);
-  }
-
-  state.direction = glm::dvec4(Q3.x,Q3.y,Q3.z,0.0f);
 }
