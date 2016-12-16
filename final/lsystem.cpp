@@ -140,14 +140,14 @@ void lsystem::evaluate_symbol(char symbol){
   /* push stack */
   case '[':
     state_stack.push(state);
-    state.width *=0.8f;
+    state.width *=0.85f;
     break;
 
   /* pop stack */
   case ']':
     assert(!state_stack.empty());
-    /* on a stack pop, current vertex before pop will be a leaf node */
-    segment_spec[state.index] = LEAF;
+    /* on a stack pop, current vertex will be a leaf node */
+    segment_spec[segment_spec.size()-1] = LEAF;
     state = state_stack.top();
     state_stack.pop();
     break;
