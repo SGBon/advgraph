@@ -1,5 +1,5 @@
 CXX=g++
-CFLAGS=-c -Wall -Wextra -g -std=c++11 -Wno-write-strings
+CFLAGS=-c -Wall -Wextra -O2 -std=c++11 -Wno-write-strings
 LIBS=-lGL -lglut -lGLU -lGLEW -lm
 LDFLAGS=$(LIBS)
 SOURCES=viewer.cpp Shaders.cpp VAO.cpp tiny_obj_loader.cpp lsystem.cpp Camera.cpp glm_helpers.cpp

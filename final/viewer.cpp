@@ -37,9 +37,9 @@ glm::mat4 projection;
 
 struct VAO plant;
 
-void init() {
+void init(char* filename) {
   lsystem lsys;
-  lsys.readlsystem("plant.lsys");
+  lsys.readlsystem(filename);
 
   plant.program = shaderProgram;
   VAO_init(&plant);
@@ -137,6 +137,15 @@ int main(int argc, char **argv) {
   int fs;
   int vs;
 
+  /* default file for lsystsem */
+  char *filename = "plant.lsys";
+
+  if(argc > 1){
+    filename = argv[1];
+  }else{
+    printf("using default file plant.lsys");
+  }
+
 	glutInit(&argc, argv);
 	glutInitContextVersion(3,3);
   glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
@@ -168,6 +177,6 @@ int main(int argc, char **argv) {
   camera.setNearAndFarPlanes(1.0f,1000.0f);
   camera.setPosition(glm::vec3(0.0f,30.0f,100.0f));
 
-  init();
+  init(filename);
   glutMainLoop();
 }

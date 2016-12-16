@@ -14,7 +14,13 @@ lsystem::lsystem(const glm::vec4 origin,
 
 void lsystem::readlsystem(const std::string &filename){
   std::unordered_map<std::string,std::string> productions;
-  std::fstream file(filename);
+  std::ifstream file(filename);
+
+  /* check if file was opened successfully */
+  if(!file.is_open()){
+    fprintf(stderr,"Error opening file %s\n",filename.c_str());
+    exit(1);
+  }
 
   /* get parameters and productions from file, format is:
   generations magnitude angle
