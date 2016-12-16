@@ -14,5 +14,5 @@ out vec3 normal;
 void main() {
 	gl_Position = projection * modelView * vPosition;
 	normal = (modelView * vec4(vNormal,1.0)).xyz;
-	position = gl_Position;
+	position = vPosition;
 }

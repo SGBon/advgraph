@@ -68,6 +68,7 @@ void displayFunc(void) {
     GLuint projLoc;
     GLuint eyeLoc;
     GLuint baseLoc;
+    GLuint lightLoc;
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -91,6 +92,9 @@ void displayFunc(void) {
 
     baseLoc = glGetUniformLocation(lprog,"base");
     glUniform4fv(baseLoc,1,glm::value_ptr(black));
+
+    lightLoc = glGetUniformLocation(lprog,"light");
+    glUniform3f(lightLoc,0.0,10.0,10.0);
 
     glBindVertexArray(plant.id);
     glDrawElements(GL_TRIANGLES, plant.num_indices, GL_UNSIGNED_INT, NULL);
@@ -169,6 +173,7 @@ int main(int argc, char **argv) {
   dumpProgram(shaderProgram, "ground shader");
 
   camera.setNearAndFarPlanes(1.0f,1000.0f);
+  camera.setPosition(glm::vec3(0.0f,30.0f,100.0f));
 
   init();
   glutMainLoop();

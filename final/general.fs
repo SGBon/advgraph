@@ -14,12 +14,11 @@ out vec4 fragcolor;
 void main() {
 	const vec4 white = vec4(1.0, 1.0, 1.0, 1.0);
 	float diffuse;
-	vec3 L = normalize(vec3(0.0, 1.0, 0.0) - position.xyz);
-	vec3 N;
-	vec3 H = normalize(L+(Eye - position.xyz));
+	vec3 L = normalize(light - position.xyz);
+	vec3 N = normalize(normal);
+	vec3 H = normalize(L + (Eye - position.xyz));
 	float specular;
 
-	N = normalize(normal);
 	diffuse = dot(N,L);
 	if(diffuse < 0.0) {
 		diffuse = 0.0;
